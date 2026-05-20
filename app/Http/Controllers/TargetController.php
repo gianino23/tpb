@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Target;
+use App\Models\Tpb;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Crypt;
@@ -11,10 +12,11 @@ class TargetController extends Controller
 {
     public function index()
     {
-        $targets = Target::all()->sortBy('no_target', SORT_NATURAL)->values();
+        $targets = Target::with('tpb')->get()->sortBy('no_target', SORT_NATURAL)->values();
+        $tpbs = Tpb::all();
 
         //return view with data
-        return view('target.index', compact('targets'));
+        return view('target.index', compact('targets', 'tpbs'));
     }
 
     public function list($id)
@@ -28,6 +30,7 @@ class TargetController extends Controller
     {
         //define validation rules
         $validator = Validator::make($request->all(), [
+            'tpb_id'      => 'required',
             'no_target'   => 'required',
             'nama_target'   => 'required',
         ]);
@@ -42,6 +45,7 @@ class TargetController extends Controller
 
         //create post
         $target = Target::create([
+            'tpb_id'        => $request->tpb_id,
             'no_target'     => $request->no_target,
             'nama_target'     => $request->nama_target, 
         ]);
@@ -70,6 +74,7 @@ class TargetController extends Controller
         $target = Target::findOrFail($id);
         //define validation rules
         $validator = Validator::make($request->all(), [
+            'tpb_id'      => 'required',
             'no_target'   => 'required',
             'nama_target' => 'required',
         ]);
@@ -84,6 +89,7 @@ class TargetController extends Controller
         }
         //create post
         $target->update([
+            'tpb_id'      => $request->tpb_id,
             'no_target'   => $request->no_target, 
             'nama_target'     => $request->nama_target, 
         ]);

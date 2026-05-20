@@ -14,9 +14,13 @@ class Target extends Model
 
     protected $fillable = [
         'id',
+        'tpb_id',
         'no_target',
         'nama_target'
     ];
 
-   
+    public function tpb()
+    {
+        return $this->belongsTo(Tpb::class, 'tpb_id', 'id');
+    }
 }

@@ -15,6 +15,18 @@
             <input type="hidden" id="target_id">
           <div class="row">
             <div class="col mb-3">
+              <label for="tpb_id-edit" class="control-label">Data TPB</label>
+              <select class="form-control select2" id="tpb_id-edit" style="width: 100%">
+                  <option value="">Pilih Data TPB</option>
+                  @foreach($tpbs as $tpb)
+                  <option value="{{ $tpb->id }}">Pilar {{ $tpb->pilar }} - {{ $tpb->no_tpb }} - {{ $tpb->nama_tpb }}</option>
+                  @endforeach
+              </select>
+              <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-tpb_id-edit"></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col mb-3">
               <label for="no_target" class="control-label">No Indikator</label>
               <input type="text" class="form-control" id="no_target-edit">
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-no_target-edit"></div>
@@ -54,6 +66,7 @@
 
                 //fill data to form
                 $('#target_id').val(response.data.id);
+                $('#tpb_id-edit').val(response.data.tpb_id).trigger('change');
                 $('#no_target-edit').val(response.data.no_target);
                 $('#nama_target-edit').val(response.data.nama_target);
 
@@ -69,6 +82,7 @@
 
         //define variable
         let target_id = $('#target_id').val();
+        let tpb_id   = $('#tpb_id-edit').val();
         let no_target   = $('#no_target-edit').val();
         let nama_target   = $('#nama_target-edit').val();
         let token   = $("meta[name='csrf-token']").attr("content");
@@ -80,6 +94,7 @@
             type: "PUT",
             cache: false,
             data: {
+                "tpb_id": tpb_id,
                 "no_target": no_target,
                 "nama_target": nama_target,
                 "_token": token
@@ -122,8 +137,13 @@
             },
             error:function(error){
                 
+                if(error.responseJSON.tpb_id && error.responseJSON.tpb_id[0]) {
+                $('#alert-tpb_id-edit').removeClass('d-none');
+                $('#alert-tpb_id-edit').addClass('d-block');
+                $('#alert-tpb_id-edit').html(error.responseJSON.tpb_id[0]);
+                } 
 
-                if(error.responseJSON.no_target[0]) {
+                if(error.responseJSON.no_target && error.responseJSON.no_target[0]) {
 
                 //show alert
                 $('#alert-no_target-edit').removeClass('d-none');
@@ -149,4 +169,9 @@
 
     });
 
+    $(document).ready(function() {
+        $('#tpb_id-edit').select2({
+            dropdownParent: $('#modal-edit')
+        });
+    });
 </script>

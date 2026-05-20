@@ -13,11 +13,11 @@ class IndikatorController extends Controller
 {
     public function index()
     {
-        //get all posts from Models
-        $indikators = Indikator::all();
+        $indikators = Indikator::with('target')->get();
+        $targets = Target::all()->sortBy('no_target', SORT_NATURAL)->values();
 
         //return view with data
-        return view('indikator.index', compact('indikators'));
+        return view('indikator.index', compact('indikators', 'targets'));
     }
 
     public function list($id)
@@ -31,8 +31,7 @@ class IndikatorController extends Controller
     {
         //define validation rules
         $validator = Validator::make($request->all(), [
-            'no_indikator'   => 'required',
-            'nama_indikator_tpb'   => 'required',
+            'target_id'   => 'required',
             'indikator_rpjmd'   => 'required',
             'target_rpjmd'   => 'required',
             'dokumen_pendukung'   => 'required',
@@ -51,11 +50,14 @@ class IndikatorController extends Controller
             ], 422);
         }
 
+        $target_rel = Target::find($request->target_id);
+
         //create post
         $indikator = Indikator::create([
-            'no_indikator'     => $request->no_indikator,
-            'nama_indikator_tpb'     => $request->nama_indikator_tpb,
-            'indikator_rpjmd'     => $request->indikator_rpjmd, 
+            'target_id'          => $request->target_id,
+            'no_indikator'       => $target_rel ? $target_rel->no_target : '',
+            'nama_indikator_tpb' => $target_rel ? $target_rel->nama_target : '',
+            'indikator_rpjmd'    => $request->indikator_rpjmd, 
             'target_rpjmd'     => $request->target_rpjmd, 
             'dokumen_pendukung'     => $request->dokumen_pendukung, 
             'catatan'     => $request->catatan, 
@@ -91,8 +93,7 @@ class IndikatorController extends Controller
 
         //define validation rules
         $validator = Validator::make($request->all(), [
-            'no_indikator'               => 'required',
-            'nama_indikator_tpb'         => 'required',
+            'target_id'                  => 'required',
             'indikator_rpjmd'            => 'required',
             'target_rpjmd'               => 'required',
             'dokumen_pendukung'          => 'required',
@@ -112,10 +113,13 @@ class IndikatorController extends Controller
             ], 422);
         }
 
+        $target_rel = Target::find($request->target_id);
+
         //update post
         $indikator->update([
-            'no_indikator'               => $request->no_indikator,
-            'nama_indikator_tpb'         => $request->nama_indikator_tpb,
+            'target_id'                  => $request->target_id,
+            'no_indikator'               => $target_rel ? $target_rel->no_target : '',
+            'nama_indikator_tpb'         => $target_rel ? $target_rel->nama_target : '',
             'indikator_rpjmd'            => $request->indikator_rpjmd,
             'target_rpjmd'               => $request->target_rpjmd,
             'dokumen_pendukung'          => $request->dokumen_pendukung,

@@ -15,16 +15,14 @@
         <div class="modal-body">
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">No Indikator</label>
-              <input type="text" id="no_indikator" class="form-control" />
-              <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-no_indikator"></div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col mb-3">
-              <label for="nameBasic" class="form-label">Indikator TPB</label>
-              <textarea class="form-control" id="nama_indikator_tpb" style="min-width: 100%"></textarea>
-              <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-nama_indikator_tpb"></div>
+              <label for="target_id" class="form-label">Data Target (No Indikator & Indikator TPB)</label>
+              <select id="target_id" class="form-control select2" style="width: 100%">
+                  <option value="">Pilih Data Target</option>
+                  @foreach($targets as $target)
+                  <option value="{{ $target->id }}">{{ $target->no_target }} - {{ $target->nama_target }}</option>
+                  @endforeach
+              </select>
+              <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-target_id"></div>
             </div>
           </div>
           <div class="row">
@@ -119,8 +117,7 @@
         e.preventDefault();
 
         //define variable
-        let no_indikator  = $('#no_indikator').val();
-        let nama_indikator_tpb  = $('#nama_indikator_tpb').val();
+        let target_id  = $('#target_id').val();
         let indikator_rpjmd  = $('#indikator_rpjmd').val();
         let target_rpjmd  = $('#target_rpjmd').val();
         let dokumen_pendukung  = $('#dokumen_pendukung').val();
@@ -138,8 +135,7 @@
             type: "POST",
             cache: false,
             data: {
-                "no_indikator": no_indikator,
-                "nama_indikator_tpb": nama_indikator_tpb,
+                "target_id": target_id,
                 "indikator_rpjmd": indikator_rpjmd,
                 "target_rpjmd": target_rpjmd,
                 "dokumen_pendukung": dokumen_pendukung,
@@ -187,8 +183,7 @@
                 $('#table').prepend(pemohon);
                 
                 //clear form
-                $('#no_indikator').val('');
-                $('#nama_indikator_tpb').val('');
+                $('#target_id').val('').trigger('change');
                 $('#indikator_rpjmd').val('');
 
                 //close modal
@@ -198,15 +193,10 @@
             },
             error:function(error){
 
-                if(error.responseJSON.no_indikator[0]) {
-
-                    //show alert
-                    $('#alert-no_indikator').removeClass('d-none');
-                    $('#alert-no_indikator').addClass('d-block');
-                  
-                    //add message to alert
-                    $('#alert-no_indikator').html(error.responseJSON.no_indikator[0]);
-                   
+                if(error.responseJSON.target_id && error.responseJSON.target_id[0]) {
+                    $('#alert-target_id').removeClass('d-none');
+                    $('#alert-target_id').addClass('d-block');
+                    $('#alert-target_id').html(error.responseJSON.target_id[0]);
                 } 
 
                
@@ -218,4 +208,9 @@
 
     });
 
+    $(document).ready(function() {
+        $('#target_id').select2({
+            dropdownParent: $('#modal-create')
+        });
+    });
 </script>

@@ -17,6 +17,18 @@
         <div class="modal-body">
           <div class="row">
             <div class="col mb-3">
+              <label for="tpb_id" class="form-label">Data TPB</label>
+              <select id="tpb_id" class="form-control select2" style="width: 100%">
+                  <option value="">Pilih Data TPB</option>
+                  @foreach($tpbs as $tpb)
+                  <option value="{{ $tpb->id }}">Pilar {{ $tpb->pilar }} - {{ $tpb->no_tpb }} - {{ $tpb->nama_tpb }}</option>
+                  @endforeach
+              </select>
+              <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-tpb_id"></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col mb-3">
               <label for="nameBasic" class="form-label">No Indikator</label>
               <input type="text" id="no_target" class="form-control" />
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-no_target"></div>
@@ -56,6 +68,7 @@
         e.preventDefault();
 
         //define variable
+        let tpb_id     = $('#tpb_id').val();
         let no_target  = $('#no_target').val();
         let nama_target  = $('#nama_target').val();
         let token   = $("meta[name='csrf-token']").attr("content");
@@ -67,6 +80,7 @@
             type: "POST",
             cache: false,
             data: {
+                "tpb_id": tpb_id,
                 "no_target": no_target,
                 "nama_target": nama_target,
                 "_token": token
@@ -100,6 +114,7 @@
                 $('#table').prepend(pemohon);
                 
                 //clear form
+                $('#tpb_id').val('').trigger('change');
                 $('#no_target').val('');
                 $('#nama_target').val('');
 
@@ -110,8 +125,13 @@
             },
             error:function(error){
 
+                if(error.responseJSON.tpb_id && error.responseJSON.tpb_id[0]) {
+                  $('#alert-tpb_id').removeClass('d-none');
+                  $('#alert-tpb_id').addClass('d-block');
+                  $('#alert-tpb_id').html(error.responseJSON.tpb_id[0]);
+                } 
 
-                if(error.responseJSON.no_target[0]) {
+                if(error.responseJSON.no_target && error.responseJSON.no_target[0]) {
 
                   //show alert
                   $('#alert-no_target').removeClass('d-none');
@@ -140,4 +160,9 @@
 
     });
 
+    $(document).ready(function() {
+        $('#tpb_id').select2({
+            dropdownParent: $('#modal-create')
+        });
+    });
 </script>

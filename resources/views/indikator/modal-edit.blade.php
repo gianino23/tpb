@@ -15,16 +15,14 @@
             <input type="hidden" id="indikator_id">
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">No Indikator</label>
-              <input type="text" id="no_indikator-edit" class="form-control" />
-              <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-no_indikator-edit"></div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col mb-3">
-              <label for="nameBasic" class="form-label">Indikator TPB</label>
-              <textarea class="form-control" id="nama_indikator_tpb-edit" style="min-width: 100%"></textarea>
-              <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-nama_indikator_tpb-edit"></div>
+              <label for="target_id-edit" class="form-label">Data Target (No Indikator & Indikator TPB)</label>
+              <select id="target_id-edit" class="form-control select2" style="width: 100%">
+                  <option value="">Pilih Data Target</option>
+                  @foreach($targets as $target)
+                  <option value="{{ $target->id }}">{{ $target->no_target }} - {{ $target->nama_target }}</option>
+                  @endforeach
+              </select>
+              <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-target_id-edit"></div>
             </div>
           </div>
           <div class="row">
@@ -119,8 +117,7 @@
 
                 //fill data to form
                 $('#indikator_id').val(response.data.id);
-                $('#no_indikator-edit').val(response.data.no_indikator);
-                $('#nama_indikator_tpb-edit').val(response.data.nama_indikator_tpb);
+                $('#target_id-edit').val(response.data.target_id).trigger('change');
                 $('#indikator_rpjmd-edit').val(response.data.indikator_rpjmd);
                 $('#target_rpjmd-edit').val(response.data.target_rpjmd);
                 $('#dokumen_pendukung-edit').val(response.data.dokumen_pendukung);
@@ -142,8 +139,7 @@
 
         //define variable
         let indikator_id = $('#indikator_id').val();
-        let no_indikator  = $('#no_indikator-edit').val();
-        let nama_indikator_tpb  = $('#nama_indikator_tpb-edit').val();
+        let target_id  = $('#target_id-edit').val();
         let indikator_rpjmd  = $('#indikator_rpjmd-edit').val();
         let target_rpjmd  = $('#target_rpjmd-edit').val();
         let dokumen_pendukung  = $('#dokumen_pendukung-edit').val();
@@ -161,8 +157,7 @@
             type: "PUT",
             cache: false,
             data: {
-                "no_indikator": no_indikator,
-                "nama_indikator_tpb": nama_indikator_tpb,
+                "target_id": target_id,
                 "indikator_rpjmd": indikator_rpjmd,
                 "target_rpjmd": target_rpjmd,
                 "dokumen_pendukung": dokumen_pendukung,
@@ -211,14 +206,10 @@
             },
             error:function(error){
                 
-                if(error.responseJSON.no_indikator[0]) {
-
-                //show alert
-                $('#alert-no_indikator-edit').removeClass('d-none');
-                $('#alert-no_indikator-edit').addClass('d-block');
-
-                //add message to alert
-                $('#alert-no_indikator-edit').html(error.responseJSON.no_indikator[0]);
+                if(error.responseJSON.target_id && error.responseJSON.target_id[0]) {
+                    $('#alert-target_id-edit').removeClass('d-none');
+                    $('#alert-target_id-edit').addClass('d-block');
+                    $('#alert-target_id-edit').html(error.responseJSON.target_id[0]);
                 } 
 
                 
@@ -229,4 +220,9 @@
 
     });
 
+    $(document).ready(function() {
+        $('#target_id-edit').select2({
+            dropdownParent: $('#modal-edit')
+        });
+    });
 </script>

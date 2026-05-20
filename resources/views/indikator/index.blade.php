@@ -25,6 +25,7 @@
         <table id="table" class="table table-striped table-bordered" style="width:100%">
           <thead>
             <tr class="text-nowrap">
+              <th>Pilar</th>
               <th>No Indikator</th>
               <th>Indikator TPB</th>
               <th>Indikator Yang Direncanakan Dalam RPJMD</th>
@@ -44,8 +45,9 @@
             @foreach($indikators as $data)
            
             <tr id="index_{{ $data->id }}">
-              <td>{{ $data->no_indikator }}</td> 
-              <td>{{ $data->nama_indikator_tpb }}</td>
+              <td>{{ $data->target && $data->target->tpb ? $data->target->tpb->pilar : '-' }}</td>
+              <td>{{ $data->target ? $data->target->no_target : '-' }}</td> 
+              <td>{{ $data->target ? $data->target->nama_target : '-' }}</td>
               <td>{{ $data->indikator_rpjmd }}</td>
               <td>{{ $data->target_rpjmd }}</td>
               <td>{{ $data->dokumen_pendukung }}</td>

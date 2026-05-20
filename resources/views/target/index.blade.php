@@ -25,6 +25,7 @@
         <table id="table" class="table table-striped table-bordered" style="width:100%">
           <thead>
             <tr class="text-nowrap">
+              <th>Pilar</th>
               <th>No Indikator</th>
               <th>Indikator TPB</th>
               <th style="width:150px"></th>
@@ -36,6 +37,7 @@
             @foreach($targets as $data)
            
             <tr id="index_{{ $data->id }}">
+              <td>{{ $data->tpb ? $data->tpb->pilar : '-' }}</td>
               <td>{{ $data->no_target }}</td> 
               <td>{{ $data->nama_target }}</td>
               <td class="text-center">
