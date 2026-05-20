@@ -16,7 +16,7 @@ class CapaianController extends Controller
     public function index()
     {
         //get all posts from Models
-        $tpbs = Tpb::all();
+        $tpbs = Tpb::orderByRaw('LENGTH(no_tpb) ASC, no_tpb ASC')->get();
         $targets = Target::all();
         $indikators = Indikator::all();
         $rpjmds = Rpjmd::all();

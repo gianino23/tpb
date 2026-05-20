@@ -90,7 +90,7 @@
                 
                 let pemohon = `
                     <tr id="index_${response.data.id}">
-                        <td>${response.data.no_tpb}</td>
+                        <td data-sort="${response.data.no_tpb.replace(/[^0-9]/g, '').padStart(5, '0')}">${response.data.no_tpb}</td>
                          <td>${response.data.nama_tpb}</td>
                           <td>${response.data.pilar}</td>
                         <td class="text-center">

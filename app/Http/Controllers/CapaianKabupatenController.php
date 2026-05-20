@@ -38,7 +38,7 @@ class CapaianKabupatenController extends Controller
 
         $capaians = $query->orderBy('created_at', 'desc')->get();
 
-        $tpbs = Tpb::all();
+        $tpbs = Tpb::orderByRaw('LENGTH(no_tpb) ASC, no_tpb ASC')->get();
         $targets = Target::all();
         $indikators = Indikator::all();
         $rpjmds = Rpjmd::all();

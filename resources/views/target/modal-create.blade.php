@@ -17,14 +17,14 @@
         <div class="modal-body">
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">No Target</label>
+              <label for="nameBasic" class="form-label">No Indikator</label>
               <input type="text" id="no_target" class="form-control" />
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-no_target"></div>
             </div>
           </div>
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">Nama Target</label>
+              <label for="nameBasic" class="form-label">Indikator TPB</label>
               <textarea class="form-control" id="nama_target" style="min-width: 100%"></textarea>
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-nama_target"></div>
             </div>

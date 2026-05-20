@@ -25,8 +25,8 @@
         <table id="table" class="table table-striped table-bordered" style="width:100%">
           <thead>
             <tr class="text-nowrap">
-              <th>No Target</th>
-              <th>Nama Target</th>
+              <th>No Indikator</th>
+              <th>Indikator TPB</th>
               <th style="width:150px"></th>
               
             </tr>

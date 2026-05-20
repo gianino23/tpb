@@ -37,7 +37,7 @@
             @foreach($tpbs as $data)
            
             <tr id="index_{{ $data->id }}">
-              <td>{{ $data->no_tpb }}</td>
+              <td data-sort="{{ str_pad(preg_replace('/[^0-9]/', '', $data->no_tpb), 5, '0', STR_PAD_LEFT) }}">{{ $data->no_tpb }}</td>
               <td>{{ $data->nama_tpb }}</td> 
               <td>{{ $data->pilar }}</td>
               <td class="text-center">

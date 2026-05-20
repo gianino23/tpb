@@ -15,12 +15,12 @@ class DummyDataSeeder extends Seeder
         // Dummy TPB
         \Illuminate\Support\Facades\DB::table('tb_tpb')->insert([
             [
-                'no_tpb' => '1',
+                'no_tpb' => 'TPB 1',
                 'nama_tpb' => 'Tanpa Kemiskinan',
                 'pilar' => 'Pembangunan Sosial'
             ],
             [
-                'no_tpb' => '2',
+                'no_tpb' => 'TPB 2',
                 'nama_tpb' => 'Tanpa Kelaparan',
                 'pilar' => 'Pembangunan Sosial'
             ]

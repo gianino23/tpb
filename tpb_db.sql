@@ -284,7 +284,7 @@ INSERT INTO `tb_target` (`id`, `no_target`, `nama_target`) VALUES
 
 CREATE TABLE `tb_tpb` (
   `id` int(11) NOT NULL,
-  `no_tpb` int(11) NOT NULL,
+  `no_tpb` varchar(255) NOT NULL,
   `nama_tpb` text NOT NULL,
   `pilar` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -294,23 +294,23 @@ CREATE TABLE `tb_tpb` (
 --
 
 INSERT INTO `tb_tpb` (`id`, `no_tpb`, `nama_tpb`, `pilar`) VALUES
-(3, 1, 'Mengakhiri Kemiskinan dalam Segala Bentuk Dimanapun', 'SOSIAL'),
-(4, 2, 'Menghilangkan Kelaparan, Mencapai Ketahanan Pangan dan Gizi yang Baik, serta Meningkatkan Pertanian Berkelanjutan', 'SOSIAL'),
-(5, 3, 'Menjamin Kehidupan yang Sehat dan Meningkatkan Kesejahteraan Seluruh Penduduk Semua Usia', 'SOSIAL'),
-(6, 4, 'Menjamin Kualitas Pendidikan yang Inklusif dan Merata serta Meningkatkan Kesempatan Belajar Sepanjang Hayat untuk Semua', 'SOSIAL'),
-(7, 5, 'Mencapai Kesetaraan Gender dan Memberdayakan Kaum Perempuan', 'SOSIAL'),
-(8, 6, 'Menjamin Ketersediaan serta Pengelolaan Air Bersih dan Sanitasi yang Berkelanjutan', 'LINGKUNGAN'),
-(9, 7, 'Menjamin Akses Energi yang Terjangkau, Andal, Berkelanjutan dan Modern untuk Semua', 'EKONOMI'),
-(10, 8, 'Meningkatkan Pertumbuhan Ekonomi yang Inklusif dan Berkelanjutan, Kesempatan Kerja yang Produktif dan Menyeluruh, serta Pekerjaan yang Layak untuk Semua', 'EKONOMI'),
-(11, 9, 'Membangun Infrastruktur yang Tangguh, Meningkatkan Industri Inklusif dan Berkelanjutan, serta Mendorong Inovasi', 'EKONOMI'),
-(12, 10, 'Mengurangi Kesenjangan Intra- dan Antarnegara', 'EKONOMI'),
-(13, 11, 'Menjadikan Kota dan Permukiman Inklusif, Aman, Tangguh dan Berkelanjutan', 'LINGKUNGAN'),
-(14, 12, 'Menjamin Pola Produksi dan Konsumsi yang Berkelanjutan', 'LINGKUNGAN'),
-(15, 13, 'Mengambil Tindakan Cepat untuk Mengatasi Perubahan Iklim dan Dampaknya', 'LINGKUNGAN'),
-(16, 14, 'Melestarikan dan Memanfaatkan secara Berkelanjutan Sumber Daya Kelautan dan Samudera untuk Pembangunan Berkelanjutan', 'LINGKUNGAN'),
-(17, 15, 'Melindungi, Merestorasi dan Meningkatkan Pemanfaatan Berkelanjutan Ekosistem Daratan, Mengelola Hutan secara Lestari, Menghentikan Penggurunan, Memulihkan Degradasi Lahan, serta Menghentikan Kehilangan Keanekaragaman Hayati', 'LINGKUNGAN'),
-(18, 16, 'Menguatkan Masyarakat yang Inklusif dan Damai untuk Pembangunan Berkelanjutan, Menyediaan Akses Keadilan untuk Semua, dan Membangun Kelembagaan yang Efektif, Akuntabel, dan Inklusif di Semua Tingkatan', 'HUKUM & TATA KELOLA'),
-(19, 17, 'Menguatkan Sarana Pelaksanaan dan Merevitalisasi Kemitraan Global untuk Pembangunan Berkelanjutan', 'EKONOMI');
+(3, 'TPB 1', 'Mengakhiri Kemiskinan dalam Segala Bentuk Dimanapun', 'SOSIAL'),
+(4, 'TPB 2', 'Menghilangkan Kelaparan, Mencapai Ketahanan Pangan dan Gizi yang Baik, serta Meningkatkan Pertanian Berkelanjutan', 'SOSIAL'),
+(5, 'TPB 3', 'Menjamin Kehidupan yang Sehat dan Meningkatkan Kesejahteraan Seluruh Penduduk Semua Usia', 'SOSIAL'),
+(6, 'TPB 4', 'Menjamin Kualitas Pendidikan yang Inklusif dan Merata serta Meningkatkan Kesempatan Belajar Sepanjang Hayat untuk Semua', 'SOSIAL'),
+(7, 'TPB 5', 'Mencapai Kesetaraan Gender dan Memberdayakan Kaum Perempuan', 'SOSIAL'),
+(8, 'TPB 6', 'Menjamin Ketersediaan serta Pengelolaan Air Bersih dan Sanitasi yang Berkelanjutan', 'LINGKUNGAN'),
+(9, 'TPB 7', 'Menjamin Akses Energi yang Terjangkau, Andal, Berkelanjutan and Modern untuk Semua', 'EKONOMI'),
+(10, 'TPB 8', 'Meningkatkan Pertumbuhan Ekonomi yang Inklusif dan Berkelanjutan, Kesempatan Kerja yang Produktif dan Menyeluruh, serta Pekerjaan yang Layak untuk Semua', 'EKONOMI'),
+(11, 'TPB 9', 'Membangun Infrastruktur yang Tangguh, Meningkatkan Industri Inklusif dan Berkelanjutan, serta Mendorong Inovasi', 'EKONOMI'),
+(12, 'TPB 10', 'Mengurangi Kesenjangan Intra- dan Antarnegara', 'EKONOMI'),
+(13, 'TPB 11', 'Menjadikan Kota dan Permukiman Inklusif, Aman, Tangguh dan Berkelanjutan', 'LINGKUNGAN'),
+(14, 'TPB 12', 'Menjamin Pola Produksi dan Konsumsi yang Berkelanjutan', 'LINGKUNGAN'),
+(15, 'TPB 13', 'Mengambil Tindakan Cepat untuk Mengatasi Perubahan Iklim dan Dampaknya', 'LINGKUNGAN'),
+(16, 'TPB 14', 'Melestarikan dan Memanfaatkan secara Berkelanjutan Sumber Daya Kelautan dan Samudera untuk Pembangunan Berkelanjutan', 'LINGKUNGAN'),
+(17, 'TPB 15', 'Melindungi, Merestorasi dan Meningkatkan Pemanfaatan Berkelanjutan Ekosistem Daratan, Mengelola Hutan secara Lestari, Menghentikan Penggurunan, Memulihkan Degradasi Lahan, serta Menghentikan Kehilangan Keanekaragaman Hayati', 'LINGKUNGAN'),
+(18, 'TPB 16', 'Menguatkan Masyarakat yang Inklusif dan Damai untuk Pembangunan Berkelanjutan, Menyediaan Akses Keadilan untuk Semua, dan Membangun Kelembagaan yang Efektif, Akuntabel, dan Inklusif di Semua Tingkatan', 'HUKUM & TATA KELOLA'),
+(19, 'TPB 17', 'Menguatkan Sarana Pelaksanaan dan Merevitalisasi Kemitraan Global untuk Pembangunan Berkelanjutan', 'EKONOMI');
 
 -- --------------------------------------------------------
 

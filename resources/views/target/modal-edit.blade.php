@@ -15,14 +15,14 @@
             <input type="hidden" id="target_id">
           <div class="row">
             <div class="col mb-3">
-              <label for="no_target" class="control-label">No Target</label>
+              <label for="no_target" class="control-label">No Indikator</label>
               <input type="text" class="form-control" id="no_target-edit">
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-no_target-edit"></div>
             </div>
           </div>
           <div class="row">
             <div class="col mb-3">
-              <label for="nama_target" class="control-label">Nama Target</label>
+              <label for="nama_target" class="control-label">Indikator TPB</label>
               <textarea class="form-control" id="nama_target-edit" style="min-width: 100%"></textarea>
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-nama_target-edit"></div>
             </div>

@@ -11,8 +11,7 @@ class TargetController extends Controller
 {
     public function index()
     {
-        //get all posts from Models
-        $targets = Target::all();
+        $targets = Target::all()->sortBy('no_target', SORT_NATURAL)->values();
 
         //return view with data
         return view('target.index', compact('targets'));

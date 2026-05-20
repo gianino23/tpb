@@ -12,7 +12,7 @@ class TpbController extends Controller
     public function index()
     {
         //get all posts from Models
-        $tpbs = Tpb::all();
+        $tpbs = Tpb::orderByRaw('LENGTH(no_tpb) ASC, no_tpb ASC')->get();
 
         //return view with data
         return view('tpb.index', compact('tpbs'));
