@@ -186,14 +186,14 @@
             <li class="menu-item {{ Request::is('target*') ? 'active' : '' }}">
                 <a href="{{ route('target.index') }}" class="menu-link">
                   <i class="menu-icon tf-icons bx bx-copy"></i>
-                  <div data-i18n="Analytics">Data Target</div>
+                  <div data-i18n="Analytics">Data Indikator</div>
                 </a>
             </li>
            
             <li class="menu-item {{ Request::is('indikator*') ? 'active' : '' }}">
               <a href="{{ route('indikator.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-crown"></i>
-                <div data-i18n="Analytics">Data Indikator</div>
+                <div data-i18n="Analytics">Data Target</div>
               </a>
           </li>
           <li class="menu-item {{ Request::is('rpjmd*') ? 'active' : '' }}">
@@ -242,6 +242,12 @@
                 <div data-i18n="Analytics">Capaian Kab/Kota</div>
               </a>
           </li>
+          <li class="menu-item {{ Request::is('indikator*') ? 'active' : '' }}">
+              <a href="{{ route('indikator.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-crown"></i>
+                <div data-i18n="Analytics">Data Target</div>
+              </a>
+          </li>
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Pengaturan</span>
             </li>
@@ -256,6 +262,12 @@
               <a href="{{ route('capaian_kabupaten.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-file"></i>
                 <div data-i18n="Analytics">Capaian Kab/Kota</div>
+              </a>
+          </li>
+          <li class="menu-item {{ Request::is('indikator*') ? 'active' : '' }}">
+              <a href="{{ route('indikator.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-crown"></i>
+                <div data-i18n="Analytics">Data Target</div>
               </a>
           </li>
             <li class="menu-header small text-uppercase">

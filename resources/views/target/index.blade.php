@@ -12,7 +12,7 @@
       <div class="card-body">
         <div class="row">
           <div class="col mb-6">
-            <h4 class=""><span class="text-muted fw-light">Data /</span> Target </h4>
+            <h4 class=""><span class="text-muted fw-light">Data /</span> Indikator </h4>
         
           </div>
           <div class="col mb-6">

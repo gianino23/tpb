@@ -16,6 +16,10 @@ class DashboardController extends Controller
         $capaians = Capaian::all();
         
         $queryKab = CapaianKabupaten::query();
+        // Only show Capaian if the target (indikator) is verified
+        $queryKab->whereHas('indikator', function ($q) {
+            $q->where('status', 'Terverifikasi');
+        });
         if ($user->level == 'Operator Kabupaten/Kota') {
             $queryKab->where('user_id', $user->id);
         }
@@ -35,7 +39,10 @@ class DashboardController extends Controller
         ];
 
         // Recent Activity (last 5 records or logs)
-        $recentActivities = CapaianKabupaten::with(['user', 'indikator'])
+        $recentActivities = CapaianKabupaten::whereHas('indikator', function ($q) {
+                $q->where('status', 'Terverifikasi');
+            })
+            ->with(['user', 'indikator'])
             ->orderBy('updated_at', 'desc')
             ->take(5)
             ->get();

@@ -31,6 +31,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('target', TargetController::class);
     Route::put('/target/{Target}', 'App\Http\Controllers\TargetController@update');
 
+    Route::post('/indikator/import', [IndikatorController::class, 'import'])->name('indikator.import');
+    Route::post('/indikator/verify/{id}', [IndikatorController::class, 'verify'])->name('indikator.verify');
+    Route::post('/indikator/reject/{id}', [IndikatorController::class, 'reject'])->name('indikator.reject');
     Route::resource('indikator', IndikatorController::class);
     Route::put('/indikator/{Indikator}', 'App\Http\Controllers\IndikatorController@update');
 

@@ -3,7 +3,7 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel1">Edit Data Indikator</h5>
+          <h5 class="modal-title" id="exampleModalLabel1">Edit Data Target</h5>
           <button
             type="button"
             class="btn-close"
@@ -15,21 +15,14 @@
             <input type="hidden" id="indikator_id">
           <div class="row">
             <div class="col mb-3">
-              <label for="target_id-edit" class="form-label">Data Target (No Indikator & Indikator TPB)</label>
+              <label for="target_id-edit" class="form-label">Data Indikator TPB</label>
               <select id="target_id-edit" class="form-control select2" style="width: 100%">
-                  <option value="">Pilih Data Target</option>
+                  <option value="">Pilih Data Indikator TPB</option>
                   @foreach($targets as $target)
-                  <option value="{{ $target->id }}">{{ $target->no_target }} - {{ $target->nama_target }}</option>
+                  <option value="{{ $target->id }}" data-nama="{{ $target->nama_target }}">{{ $target->no_target }} - {{ $target->nama_target }}</option>
                   @endforeach
               </select>
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-target_id-edit"></div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col mb-3">
-              <label for="nameBasic" class="form-label">Indikator Yang Direncanakan Dalam RPJMD</label>
-              <textarea class="form-control" id="indikator_rpjmd-edit" style="min-width: 100%"></textarea>
-              <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-indikator_rpjmd-edit"></div>
             </div>
           </div>
           <div class="row">
@@ -118,7 +111,6 @@
                 //fill data to form
                 $('#indikator_id').val(response.data.id);
                 $('#target_id-edit').val(response.data.target_id).trigger('change');
-                $('#indikator_rpjmd-edit').val(response.data.indikator_rpjmd);
                 $('#target_rpjmd-edit').val(response.data.target_rpjmd);
                 $('#dokumen_pendukung-edit').val(response.data.dokumen_pendukung);
                 $('#catatan-edit').val(response.data.catatan);
@@ -140,7 +132,6 @@
         //define variable
         let indikator_id = $('#indikator_id').val();
         let target_id  = $('#target_id-edit').val();
-        let indikator_rpjmd  = $('#indikator_rpjmd-edit').val();
         let target_rpjmd  = $('#target_rpjmd-edit').val();
         let dokumen_pendukung  = $('#dokumen_pendukung-edit').val();
         let catatan  = $('#catatan-edit').val();
@@ -158,7 +149,6 @@
             cache: false,
             data: {
                 "target_id": target_id,
-                "indikator_rpjmd": indikator_rpjmd,
                 "target_rpjmd": target_rpjmd,
                 "dokumen_pendukung": dokumen_pendukung,
                 "catatan": catatan,

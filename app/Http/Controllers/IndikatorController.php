@@ -8,6 +8,8 @@ use App\Models\Indikator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Auth;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class IndikatorController extends Controller
 {
@@ -32,7 +34,6 @@ class IndikatorController extends Controller
         //define validation rules
         $validator = Validator::make($request->all(), [
             'target_id'   => 'required',
-            'indikator_rpjmd'   => 'required',
             'target_rpjmd'   => 'required',
             'dokumen_pendukung'   => 'required',
             'catatan'   => 'required',
@@ -57,7 +58,7 @@ class IndikatorController extends Controller
             'target_id'          => $request->target_id,
             'no_indikator'       => $target_rel ? $target_rel->no_target : '',
             'nama_indikator_tpb' => $target_rel ? $target_rel->nama_target : '',
-            'indikator_rpjmd'    => $request->indikator_rpjmd, 
+            'indikator_rpjmd'    => $target_rel ? $target_rel->nama_target : '', 
             'target_rpjmd'     => $request->target_rpjmd, 
             'dokumen_pendukung'     => $request->dokumen_pendukung, 
             'catatan'     => $request->catatan, 
@@ -65,7 +66,8 @@ class IndikatorController extends Controller
             'ringkasan_target_perpres59'     => $request->ringkasan_target_perpres59, 
             'kewenangan_kabupaten'     => $request->kewenangan_kabupaten, 
             'kewenangan_kota'     => $request->kewenangan_kota, 
-
+            'user_id'            => Auth::id(),
+            'status'             => 'Menunggu Validasi',
         ]);
 
         //return response
@@ -74,6 +76,129 @@ class IndikatorController extends Controller
             'message' => 'Data Berhasil Disimpan!',
             'data'    => $indikator
         ]);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls'
+        ]);
+
+        $file = $request->file('file');
+        $spreadsheet = IOFactory::load($file->getPathname());
+        $worksheet = $spreadsheet->getActiveSheet();
+        $rows = $worksheet->toArray();
+
+        $successCount = 0;
+        $warningCount = 0;
+        $failedCount = 0;
+        $errors = [];
+
+        // Data starts at row 5 (index 4) if headers are kept up to row 4.
+        // The instruction says "MULAI ISI DATA DI BAWAH BARIS INI (hapus baris contoh no.5 dan 6 sebelum upload)"
+        // It implies row 7 is where data starts if examples are not deleted, or row 5 if deleted.
+        // We will just skip rows that don't look like valid data or check from row 5 onwards.
+        for ($i = 4; $i < count($rows); $i++) {
+            $row = $rows[$i];
+            
+            $noIndikator = trim($row[0] ?? '');
+            
+            // Skip empty rows
+            if (empty($noIndikator) && empty($row[1]) && empty($row[2])) {
+                continue;
+            }
+            
+            // Skip example rows which usually contain specific text
+            if (str_contains($noIndikator, 'MULAI ISI DATA')) {
+                continue;
+            }
+
+            $indikatorRpjmd = trim($row[1] ?? '');
+            $targetRpjmd = trim($row[2] ?? '');
+            $dokumenData = trim($row[3] ?? '');
+            $catatan = trim($row[4] ?? '');
+            $targetPerpres = trim($row[5] ?? '');
+            $targetPerpresRingkas = trim($row[6] ?? '');
+            $kewenanganKab = trim($row[7] ?? '');
+            $kewenanganKota = trim($row[8] ?? '');
+
+            // Validations
+            $target = Target::where('no_target', $noIndikator)->first();
+            if (!$target) {
+                $failedCount++;
+                $errors[] = "Baris " . ($i+1) . ": No Indikator '$noIndikator' tidak ditemukan di master data sistem.";
+                continue;
+            }
+
+            if (empty($targetRpjmd) || empty($dokumenData) || empty($catatan)) {
+                $failedCount++;
+                $errors[] = "Baris " . ($i+1) . ": Kolom C, D, atau E tidak boleh kosong.";
+                continue;
+            }
+
+            if (!in_array(strtolower($kewenanganKab), ['ya', 'tidak']) || !in_array(strtolower($kewenanganKota), ['ya', 'tidak'])) {
+                $failedCount++;
+                $errors[] = "Baris " . ($i+1) . ": Kolom H dan I (Kewenangan) hanya boleh berisi Ya atau Tidak.";
+                continue;
+            }
+
+            // Warning for format on Catatan
+            $hasWarning = false;
+            // Format check: Capaian [nilai] | GAP [nilai] | Status: SS/SB/BB/NA
+            if (!preg_match('/Capaian.*\|.*GAP.*\|.*Status:/i', $catatan)) {
+                $hasWarning = true;
+                $warningCount++;
+            } else {
+                $successCount++;
+            }
+
+            Indikator::create([
+                'target_id'                  => $target->id,
+                'no_indikator'               => $target->no_target,
+                'nama_indikator_tpb'         => $target->nama_target,
+                'indikator_rpjmd'            => $target->nama_target,
+                'target_rpjmd'               => $targetRpjmd,
+                'dokumen_pendukung'          => $dokumenData,
+                'catatan'                    => $catatan,
+                'target_perpres59'           => $targetPerpres,
+                'ringkasan_target_perpres59' => $targetPerpresRingkas,
+                'kewenangan_kabupaten'       => (strtolower($kewenanganKab) == 'ya') ? 'Kabupaten' : '-',
+                'kewenangan_kota'            => (strtolower($kewenanganKota) == 'ya') ? 'Kota' : '-',
+                'user_id'                    => Auth::id(),
+                'status'                     => 'Menunggu Validasi',
+            ]);
+        }
+
+        $request->session()->put('import_summary', [
+            'success' => $successCount,
+            'warning' => $warningCount,
+            'failed'  => $failedCount,
+            'errors'  => $errors
+        ]);
+
+        return redirect()->back()->with('success', 'Proses import selesai.');
+    }
+
+    public function verify(Request $request, $id)
+    {
+        $indikator = Indikator::findOrFail($id);
+        $indikator->update([
+            'status' => 'Terverifikasi',
+            'keterangan_verifikasi' => $request->keterangan_verifikasi
+        ]);
+
+        return redirect()->back()->with('success', 'Data Indikator berhasil diverifikasi.');
+    }
+
+    public function reject(Request $request, $id)
+    {
+        $indikator = Indikator::findOrFail($id);
+        $indikator->update([
+            'status' => 'Ditolak',
+            'keterangan_verifikasi' => $request->keterangan_verifikasi
+        ]);
+
+        return redirect()->back()->with('success', 'Data Indikator telah ditolak dengan keterangan.');
     }
 
     public function show($id)
@@ -94,7 +219,6 @@ class IndikatorController extends Controller
         //define validation rules
         $validator = Validator::make($request->all(), [
             'target_id'                  => 'required',
-            'indikator_rpjmd'            => 'required',
             'target_rpjmd'               => 'required',
             'dokumen_pendukung'          => 'required',
             'catatan'                    => 'required',
@@ -120,7 +244,7 @@ class IndikatorController extends Controller
             'target_id'                  => $request->target_id,
             'no_indikator'               => $target_rel ? $target_rel->no_target : '',
             'nama_indikator_tpb'         => $target_rel ? $target_rel->nama_target : '',
-            'indikator_rpjmd'            => $request->indikator_rpjmd,
+            'indikator_rpjmd'            => $target_rel ? $target_rel->nama_target : '',
             'target_rpjmd'               => $request->target_rpjmd,
             'dokumen_pendukung'          => $request->dokumen_pendukung,
             'catatan'                    => $request->catatan,

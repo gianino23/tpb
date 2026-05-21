@@ -24,11 +24,19 @@ class Indikator extends Model
         'target_perpres59',
         'ringkasan_target_perpres59',
         'kewenangan_kabupaten',
-        'kewenangan_kota'
+        'kewenangan_kota',
+        'status',
+        'keterangan_verifikasi',
+        'user_id'
     ];
 
     public function target()
     {
         return $this->belongsTo(Target::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

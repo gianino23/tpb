@@ -181,22 +181,22 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Target</label>
-                            <select name="target_id" class="form-control select2" required>
-                                <option value="" disabled selected>Pilih Target</option>
-                                @foreach($targets as $t)
-                                    <option value="{{ $t->id }}">{{ $t->no_target }} - {{ $t->nama_target }}</option>
+                            <label class="form-label">Data Target RPJMD</label>
+                            <select name="indikator_id" class="form-control select2" required>
+                                <option value="" disabled selected>Pilih Target RPJMD</option>
+                                @foreach($indikators as $t)
+                                    <option value="{{ $t->id }}">{{ $t->no_indikator }} - {{ $t->target_rpjmd }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Indikator</label>
-                            <select name="indikator_id" class="form-control select2" required>
-                                <option value="" disabled selected>Pilih Indikator</option>
-                                @foreach($indikators as $t)
-                                    <option value="{{ $t->id }}">{{ $t->no_indikator }} - {{ $t->nama_indikator_tpb }}</option>
+                            <label class="form-label">Data Indikator TPB</label>
+                            <select name="target_id" class="form-control select2" required>
+                                <option value="" disabled selected>Pilih Indikator TPB</option>
+                                @foreach($targets as $t)
+                                    <option value="{{ $t->id }}">{{ $t->no_target }} - {{ $t->nama_target }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -305,20 +305,20 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Target</label>
-                            <select name="target_id" id="edit_target_id" class="form-control select2-edit" required>
-                                @foreach($targets as $t)
-                                    <option value="{{ $t->id }}">{{ $t->no_target }} - {{ $t->nama_target }}</option>
+                            <label class="form-label">Data Target RPJMD</label>
+                            <select name="indikator_id" id="edit_indikator_id" class="form-control select2-edit" required>
+                                @foreach($indikators as $t)
+                                    <option value="{{ $t->id }}">{{ $t->no_indikator }} - {{ $t->target_rpjmd }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Indikator</label>
-                            <select name="indikator_id" id="edit_indikator_id" class="form-control select2-edit" required>
-                                @foreach($indikators as $t)
-                                    <option value="{{ $t->id }}">{{ $t->no_indikator }} - {{ $t->nama_indikator_tpb }}</option>
+                            <label class="form-label">Data Indikator TPB</label>
+                            <select name="target_id" id="edit_target_id" class="form-control select2-edit" required>
+                                @foreach($targets as $t)
+                                    <option value="{{ $t->id }}">{{ $t->no_target }} - {{ $t->nama_target }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -443,8 +443,8 @@
                     <tr><th>Wilayah</th><td id="detail_wilayah"></td></tr>
                     <tr><th>OPD</th><td id="detail_opd"></td></tr>
                     <tr><th>TPB</th><td id="detail_tpb"></td></tr>
-                    <tr><th>Target</th><td id="detail_target"></td></tr>
-                    <tr><th>Indikator</th><td id="detail_indikator"></td></tr>
+                    <tr><th>Target RPJMD</th><td id="detail_indikator"></td></tr>
+                    <tr><th>Indikator TPB</th><td id="detail_target"></td></tr>
                     <tr><th>RPJMD</th><td id="detail_rpjmd"></td></tr>
                     <tr><th>Tahun N-4</th><td id="detail_n4"></td></tr>
                     <tr><th>Tahun N-3</th><td id="detail_n3"></td></tr>
@@ -526,7 +526,7 @@
                     $('#detail_opd').text(data.opd);
                     $('#detail_tpb').text(data.tpb ? data.tpb.no_tpb + ' - ' + data.tpb.nama_tpb : '-');
                     $('#detail_target').text(data.target ? data.target.no_target + ' - ' + data.target.nama_target : '-');
-                    $('#detail_indikator').text(data.indikator ? data.indikator.no_indikator + ' - ' + data.indikator.nama_indikator_tpb : '-');
+                    $('#detail_indikator').text(data.indikator ? data.indikator.no_indikator + ' - ' + data.indikator.target_rpjmd : '-');
                     $('#detail_rpjmd').text(data.rpjmd ? data.rpjmd.no_indikator_rpjmd + ' - ' + data.rpjmd.indikator_kinerja : '-');
                     $('#detail_n4').text(data.tahun_n4);
                     $('#detail_n3').text(data.tahun_n3);

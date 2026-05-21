@@ -21,6 +21,11 @@ class CapaianKabupatenController extends Controller
         $user = Auth::user();
         $query = CapaianKabupaten::query();
 
+        // Only show Capaian if the target (indikator) is verified
+        $query->whereHas('indikator', function ($q) {
+            $q->where('status', 'Terverifikasi');
+        });
+
         if ($user->level == 'Operator Kabupaten/Kota') {
             $query->where('user_id', $user->id);
         }
@@ -40,7 +45,7 @@ class CapaianKabupatenController extends Controller
 
         $tpbs = Tpb::orderByRaw('LENGTH(no_tpb) ASC, no_tpb ASC')->get();
         $targets = Target::all();
-        $indikators = Indikator::all();
+        $indikators = Indikator::where('status', 'Terverifikasi')->get();
         $rpjmds = Rpjmd::all();
 
         return view('capaian_kabupaten.index', compact(
