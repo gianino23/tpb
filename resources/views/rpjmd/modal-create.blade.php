@@ -1,5 +1,4 @@
 <!-- Modal -->
-
 <div class="modal fade" id="modal-create" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
@@ -15,28 +14,57 @@
         <div class="modal-body">
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">No Indikator RPJMD</label>
+              <label for="wilayah" class="form-label">WILAYAH (Kab/Kota)</label>
+              @if(auth()->user()->level == 'Operator Kabupaten/Kota')
+                @php
+                    $user = auth()->user();
+                    $userWilayah = '';
+                    if (str_contains(strtolower($user->wilayah), 'barito kuala')) {
+                        $userWilayah = 'Barito Kuala';
+                    } elseif (str_contains(strtolower($user->wilayah), 'banjar')) {
+                        $userWilayah = 'Banjar';
+                    } elseif (str_contains(strtolower($user->wilayah), 'tapin')) {
+                        $userWilayah = 'Tapin';
+                    }
+                @endphp
+                <select id="wilayah" class="form-control" disabled>
+                    <option value="{{ $userWilayah }}">{{ $userWilayah }}</option>
+                </select>
+              @else
+                <select id="wilayah" class="form-control">
+                    <option value="">-- Pilih Wilayah --</option>
+                    <option value="Banjar">Banjar</option>
+                    <option value="Barito Kuala">Barito Kuala</option>
+                    <option value="Tapin">Tapin</option>
+                </select>
+              @endif
+              <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-wilayah"></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col mb-3">
+              <label for="no_indikator_rpjmd" class="form-label">NOMOR INDIKATOR RPJMD</label>
               <input type="text" id="no_indikator_rpjmd" class="form-control" />
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-no_indikator_rpjmd"></div>
             </div>
           </div>
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">Nama Indikator Kinerja</label>
+              <label for="indikator_kinerja" class="form-label">Nama Indikator Kinerja</label>
               <textarea class="form-control" id="indikator_kinerja" style="min-width: 100%"></textarea>
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-indikator_kinerja"></div>
             </div>
           </div>
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">SPM</label>
+              <label for="spm" class="form-label">SPM</label>
               <textarea class="form-control" id="spm" style="min-width: 100%"></textarea>
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-spm"></div>
             </div>
           </div>
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">Jenis Urusan</label>
+              <label for="jenis_urusan" class="form-label">Jenis Urusan</label>
               <select id="jenis_urusan" class="form-control" required>
                     <option value="">-- Pilih Data Jenis Urusan --</option>
                     <option value="Administrasi Kependudukan & Catatan Sipil">Administrasi Kependudukan & Catatan Sipil</option>
@@ -73,7 +101,7 @@
           </div>
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">Kategori Urusan</label>
+              <label for="kategori_urusan" class="form-label">Kategori Urusan</label>
               <select id="kategori_urusan" class="form-control" required>
                     <option value="">-- Pilih Data Kategori Urusan --</option>
                     <option value="Wajib Pelayanan Dasar">Wajib Pelayanan Dasar</option>
@@ -85,45 +113,44 @@
           </div>
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">Kekhususan Indikator</label>
+              <label for="kekhususan_indikator" class="form-label">Kekhususan Indikator</label>
               <textarea class="form-control" id="kekhususan_indikator" style="min-width: 100%"></textarea>
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-kekhususan_indikator"></div>
             </div>
           </div>
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">Referensi</label>
+              <label for="referensi" class="form-label">Referensi</label>
               <textarea class="form-control" id="referensi" style="min-width: 100%"></textarea>
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-referensi"></div>
             </div>
           </div>
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">Indikator Sama</label>
-              <textarea class="form-control" id="indikator_sama" style="min-width: 100%"></textarea>
+              <label for="indikator_sama" class="form-label">INDIKATOR SAMA (Kode TPB)</label>
+              <select id="indikator_sama" class="form-control select2" style="width: 100%">
+                  <option value="-">- (Tidak Ada Relasi)</option>
+                  @foreach($indikators as $ind)
+                      <option value="{{ $ind->no_indikator }}">{{ $ind->no_indikator }} - {{ $ind->nama_indikator_tpb }}</option>
+                  @endforeach
+              </select>
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-indikator_sama"></div>
             </div>
           </div>
-          
-
         </div>
         <div class="modal-footer">
-         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
-          <i class="tf-icons bx bx-exit"></i>Tutup
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="tf-icons bx bx-exit"></i>Tutup
           </button>
           <button type="button" class="btn btn-primary" id="store"><i class="tf-icons bx bx-save"></i>Simpan</button>
         </div>
       </div>
     </div>
-  </div>
 </div>
 
-
 <script>
-     
     //button create post event
     $('body').on('click', '#btn-create-post', function () {
-
         //open modal
         $('#modal-create').modal('show');
     });
@@ -132,7 +159,11 @@
     $('#store').click(function(e) {
         e.preventDefault();
 
+        // Reset errors
+        $('.alert-danger').addClass('d-none').removeClass('d-block').html('');
+
         //define variable
+        let wilayah = $('#wilayah').val();
         let no_indikator_rpjmd  = $('#no_indikator_rpjmd').val();
         let indikator_kinerja  = $('#indikator_kinerja').val();
         let spm  = $('#spm').val();
@@ -145,11 +176,11 @@
         
         //ajax
         $.ajax({
-
             url: "{{ route('rpjmd.store') }}",
             type: "POST",
             cache: false,
             data: {
+                "wilayah": wilayah,
                 "no_indikator_rpjmd": no_indikator_rpjmd,
                 "indikator_kinerja": indikator_kinerja,
                 "spm": spm,
@@ -161,43 +192,13 @@
                 "_token": token
             },
             success:function(response){
-
                 //show success message
                 Swal.fire({
-                    type: 'success',
                     icon: 'success',
                     title: `${response.message}`,
                     showConfirmButton: false,
                     timer: 1000
                 });
-
-                
-                let pemohon = `
-                    <tr id="index_${response.data.id}">
-                         <td>${response.data.no_indikator_rpjmd}</td>
-                         <td>${response.data.indikator_kinerja}</td>
-                         <td>${response.data.spm}</td>
-                         <td>${response.data.jenis_urusan}</td>
-                         <td>${response.data.kategori_urusan}</td>
-                         <td>${response.data.kekhususan_indikator}</td>
-                         <td>${response.data.referensi}</td>
-                         <td>${response.data.indikator_sama}</td>
-                        <td class="text-center">
-                            <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                            <a href="javascript:void(0)" id="btn-edit-post" data-id="${response.data.id}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="Edit"><i class="menu-icon tf-icons bx bx-copy"></i></a>
-                            <a href="javascript:void(0)" id="btn-delete-post" data-id="${response.data.id}" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Delete"><i class="menu-icon tf-icons bx bx-trash"></i></a>
-                            </div>
-                       </td>
-                    </tr>
-                `;
-                
-                //append to table
-                $('#table').prepend(pemohon);
-                
-                //clear form
-                $('#no_indikator_rpjmd').val('');
-                $('#nama_indikator_kinerja').val('');
-               
 
                 //close modal
                 $('#modal-create').modal('hide');
@@ -205,25 +206,49 @@
                 window.location.reload();
             },
             error:function(error){
-
-                if(error.responseJSON.no_indikator_rpjmd[0]) {
-
-                    //show alert
-                    $('#alert-no_indikator_rpjmd').removeClass('d-none');
-                    $('#alert-no_indikator_rpjmd').addClass('d-block');
-                  
-                    //add message to alert
-                    $('#alert-no_indikator_rpjmd').html(error.responseJSON.no_indikator_rpjmd[0]);
-                   
-                } 
-
-               
-
-
+                let errors = error.responseJSON.errors;
+                if (errors) {
+                    if (errors.wilayah) {
+                        $('#alert-wilayah').removeClass('d-none').addClass('d-block').html(errors.wilayah[0]);
+                    }
+                    if (errors.no_indikator_rpjmd) {
+                        $('#alert-no_indikator_rpjmd').removeClass('d-none').addClass('d-block').html(errors.no_indikator_rpjmd[0]);
+                    }
+                    if (errors.indikator_kinerja) {
+                        $('#alert-indikator_kinerja').removeClass('d-none').addClass('d-block').html(errors.indikator_kinerja[0]);
+                    }
+                    if (errors.spm) {
+                        $('#alert-spm').removeClass('d-none').addClass('d-block').html(errors.spm[0]);
+                    }
+                    if (errors.jenis_urusan) {
+                        $('#alert-jenis_urusan').removeClass('d-none').addClass('d-block').html(errors.jenis_urusan[0]);
+                    }
+                    if (errors.kategori_urusan) {
+                        $('#alert-kategori_urusan').removeClass('d-none').addClass('d-block').html(errors.kategori_urusan[0]);
+                    }
+                    if (errors.kekhususan_indikator) {
+                        $('#alert-kekhususan_indikator').removeClass('d-none').addClass('d-block').html(errors.kekhususan_indikator[0]);
+                    }
+                    if (errors.referensi) {
+                        $('#alert-referensi').removeClass('d-none').addClass('d-block').html(errors.referensi[0]);
+                    }
+                    if (errors.indikator_sama) {
+                        $('#alert-indikator_sama').removeClass('d-none').addClass('d-block').html(errors.indikator_sama[0]);
+                    }
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: error.responseJSON.message || 'Terjadi kesalahan server.'
+                    });
+                }
             }
-
         });
-
     });
 
+    $(document).ready(function() {
+        $('#indikator_sama').select2({
+            dropdownParent: $('#modal-create')
+        });
+    });
 </script>

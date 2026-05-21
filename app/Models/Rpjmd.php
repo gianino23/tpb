@@ -14,6 +14,7 @@ class Rpjmd extends Model
 
     protected $fillable = [
         'id',
+        'wilayah',
         'no_indikator_rpjmd',
         'indikator_kinerja',
         'spm',
@@ -23,6 +24,11 @@ class Rpjmd extends Model
         'referensi',
         'indikator_sama'
     ];
+
+    public function indikator()
+    {
+        return $this->belongsTo(Indikator::class, 'indikator_sama', 'no_indikator');
+    }
 
     
 }

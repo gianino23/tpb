@@ -37,6 +37,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('indikator', IndikatorController::class);
     Route::put('/indikator/{Indikator}', 'App\Http\Controllers\IndikatorController@update');
 
+    Route::get('/rpjmd/download-template', [RpjmdController::class, 'downloadTemplate'])->name('rpjmd.download-template');
+    Route::post('/rpjmd/import', [RpjmdController::class, 'import'])->name('rpjmd.import');
     Route::resource('rpjmd', RpjmdController::class);
     Route::put('/rpjmd/{Rpjmd}', 'App\Http\Controllers\RpjmdController@update');
 

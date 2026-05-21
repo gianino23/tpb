@@ -248,6 +248,12 @@
                 <div data-i18n="Analytics">Data Target</div>
               </a>
           </li>
+          <li class="menu-item {{ Request::is('rpjmd*') ? 'active' : '' }}">
+              <a href="{{ route('rpjmd.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-archive"></i>
+                <div data-i18n="Analytics">Data RPJMD</div>
+              </a>
+          </li>
             <li class="menu-header small text-uppercase">
                 <span class="menu-header-text">Pengaturan</span>
             </li>
@@ -268,6 +274,12 @@
               <a href="{{ route('indikator.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-crown"></i>
                 <div data-i18n="Analytics">Data Target</div>
+              </a>
+          </li>
+          <li class="menu-item {{ Request::is('rpjmd*') ? 'active' : '' }}">
+              <a href="{{ route('rpjmd.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-archive"></i>
+                <div data-i18n="Analytics">Data RPJMD</div>
               </a>
           </li>
             <li class="menu-header small text-uppercase">

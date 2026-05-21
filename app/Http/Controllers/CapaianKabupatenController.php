@@ -46,7 +46,20 @@ class CapaianKabupatenController extends Controller
         $tpbs = Tpb::orderByRaw('LENGTH(no_tpb) ASC, no_tpb ASC')->get();
         $targets = Target::all();
         $indikators = Indikator::where('status', 'Terverifikasi')->get();
-        $rpjmds = Rpjmd::all();
+        
+        if ($user->level == 'Operator Kabupaten/Kota') {
+            $userWilayah = '';
+            if (str_contains(strtolower($user->wilayah), 'barito kuala')) {
+                $userWilayah = 'Barito Kuala';
+            } elseif (str_contains(strtolower($user->wilayah), 'banjar')) {
+                $userWilayah = 'Banjar';
+            } elseif (str_contains(strtolower($user->wilayah), 'tapin')) {
+                $userWilayah = 'Tapin';
+            }
+            $rpjmds = Rpjmd::where('wilayah', $userWilayah)->get();
+        } else {
+            $rpjmds = Rpjmd::all();
+        }
 
         return view('capaian_kabupaten.index', compact(
             'capaians', 'tpbs', 'targets', 'indikators', 'rpjmds',
