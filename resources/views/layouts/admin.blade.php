@@ -79,16 +79,78 @@
         user-select: none;
       }
       .app-shell-brand {
-        min-height: 96px;
-        padding: 18px 24px 12px;
+        min-height: 118px;
+        padding: 22px 20px 16px;
         display: flex;
         align-items: center;
         justify-content: center;
+        position: relative;
+        margin-bottom: .25rem;
       }
       .app-shell-brand img {
-        width: 58px;
-        height: 58px;
+        width: 64px;
+        height: 64px;
         object-fit: contain;
+        filter: drop-shadow(0 8px 18px rgba(16, 24, 40, .12));
+      }
+      .app-shell-brand:after {
+        content: '';
+        position: absolute;
+        left: 18px;
+        right: 18px;
+        bottom: 0;
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(105,108,255,.22), transparent);
+      }
+      #layout-menu {
+        background:
+          linear-gradient(180deg, rgba(255,255,255,.95), rgba(248,250,255,.98)),
+          #fff;
+      }
+      #layout-menu .menu-inner {
+        padding: .5rem .75rem 1rem;
+      }
+      #layout-menu .menu-header {
+        margin: .9rem .5rem .45rem;
+      }
+      #layout-menu .menu-header-text {
+        color: #9aa4b2;
+        letter-spacing: .06em;
+        font-size: .72rem;
+        font-weight: 700;
+      }
+      #layout-menu .menu-item {
+        margin: .15rem 0;
+      }
+      #layout-menu .menu-link {
+        border-radius: .95rem;
+        min-height: 46px;
+        transition: all .2s ease;
+      }
+      #layout-menu .menu-link:hover {
+        background: rgba(105,108,255,.08);
+        transform: translateX(2px);
+      }
+      #layout-menu .menu-item.active > .menu-link {
+        background: linear-gradient(90deg, rgba(105,108,255,.14), rgba(105,108,255,.04));
+        color: #2f3b66;
+        box-shadow: inset 0 0 0 1px rgba(105,108,255,.14);
+      }
+      #layout-menu .menu-item.active > .menu-link .menu-icon,
+      #layout-menu .menu-item.active > .menu-link .bx {
+        color: #696cff !important;
+      }
+      #layout-menu .menu-icon {
+        color: #8a94a6;
+      }
+      #layout-menu .menu-link div {
+        font-weight: 600;
+      }
+      #layout-menu .menu-sub .menu-link {
+        min-height: 42px;
+      }
+      #layout-menu .menu-sub {
+        margin-left: 1.25rem;
       }
       .layout-navbar {
         min-height: 64px;
@@ -286,6 +348,17 @@
         .app-footer .footer-panel {
           border-radius: .85rem;
         }
+        .app-shell-brand {
+          min-height: 100px;
+          padding: 18px 16px 12px;
+        }
+        #layout-menu .menu-inner {
+          padding-left: .5rem;
+          padding-right: .5rem;
+        }
+        #layout-menu .menu-link {
+          min-height: 44px;
+        }
       }
     </style>
     
@@ -376,10 +449,20 @@
               <i class="bx bx-x bx-sm align-middle"></i>
             </a>
           </div>
+          <div class="px-3 pb-2">
+            <div class="p-3 rounded-4" style="background: linear-gradient(135deg, rgba(105,108,255,.08), rgba(16,185,129,.06)); border: 1px solid rgba(105,108,255,.10);">
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <span class="badge bg-label-primary">Online</span>
+                <small class="text-muted">Sistem aktif</small>
+              </div>
+              <div style="color:#566a7f;font-size:.85rem;line-height:1.35;">
+                Pemantauan capaian, evaluasi, dan pelaporan TPB.
+              </div>
+            </div>
+          </div>
          
              
          
-          <div class="text-center mb-3 d-none"></div>
           <ul class="menu-inner py-1">
             <!-- Dashboard -->
             <li class="menu-item {{ Request::is('dashboard*') ? 'active' : '' }}">
