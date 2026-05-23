@@ -3,362 +3,197 @@
 @section('content')
 
 <div class="container-xxl flex-grow-1 container-p-y">
-  <div class="row">
-    <div class="col-lg-12 mb-4 order-0">
-      <div class="card border-0 shadow-sm bg-white" style="border-left: 5px solid #696cff !important;">
-        <div class="d-flex align-items-end row">
-          <div class="col-sm-8">
-            <div class="card-body">
-              <h4 class="fw-bold text-primary mb-1">Selamat Datang, {{ auth()->user()->name }}! 🎉</h4>
-              <p class="mb-0 text-muted" style="font-size: 1.1rem;">Sistem Informasi Pemantauan dan Evaluasi Capaian Indikator TPB</p>
-              <p class="text-muted small mb-0">Provinsi Kalimantan Selatan | Dinas Lingkungan Hidup</p>
-            </div>
-          </div>
-          <div class="col-sm-4 text-center text-sm-left">
-            <div class="card-body pb-0 px-0 px-md-4">
-              <img src="{{ asset('sneat/assets/img/illustrations/man-with-laptop-light.png') }}" height="120" alt="Welcome" />
-            </div>
-          </div>
+  <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold mb-1">Evaluasi / Kinerja KLHS RPJMD</h3>
+      <div class="text-muted">Periode: {{ min($availableYears) }} - {{ max($availableYears) }} · Kalimantan Selatan</div>
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+      @foreach($availableYears as $year)
+        <a href="{{ route('dashboard.index', ['year' => $year, 'rank_by' => $rankBy]) }}"
+          class="btn {{ $selectedYear == $year ? 'btn-primary' : 'btn-outline-secondary' }}">
+          {{ $year }}
+        </a>
+      @endforeach
+      <button type="button" class="btn btn-outline-secondary">
+        <i class="bx bx-download me-1"></i> Unduh Laporan PDF
+      </button>
+    </div>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2 mb-4 pb-3 border-bottom">
+    <button class="btn btn-outline-primary active"><i class="bx bx-bar-chart-alt-2 me-1"></i> Ringkasan</button>
+    <button class="btn btn-outline-secondary"><i class="bx bx-trending-up me-1"></i> Tren Tahunan</button>
+    <button class="btn btn-outline-secondary"><i class="bx bx-clipboard me-1"></i> Catatan Tindak Lanjut</button>
+    <button class="btn btn-outline-secondary"><i class="bx bx-money-withdraw me-1"></i> Rekomendasi Anggaran</button>
+    <button class="btn btn-outline-secondary"><i class="bx bx-file me-1"></i> Laporan Otomatis</button>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-3 col-sm-6">
+      <div class="card kpi-card h-100">
+        <div class="card-body text-center">
+          <div class="kpi-number text-success">{{ $stats['ss_percent'] }}%</div>
+          <div class="fw-semibold">Tercapai (SS)</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="card kpi-card h-100">
+        <div class="card-body text-center">
+          <div class="kpi-number text-warning">{{ $stats['sb_percent'] }}%</div>
+          <div class="fw-semibold">Dalam Proses (SB)</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="card kpi-card h-100">
+        <div class="card-body text-center">
+          <div class="kpi-number text-danger">{{ $stats['bb_percent'] }}%</div>
+          <div class="fw-semibold">Belum Tercapai (BB)</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+      <div class="card kpi-card h-100">
+        <div class="card-body text-center">
+          <div class="kpi-number text-secondary">{{ $stats['critical'] }}</div>
+          <div class="fw-semibold">Indikator Kritis</div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Summary Capaian Kabupaten/Kota (Feature 4: Interactive Cards) -->
-  <div class="row mb-4 mt-2">
-    <div class="col-md-3 col-sm-6 mb-4">
-      <div class="card bg-primary text-white h-100 shadow-sm border-0 card-hover-animate">
+  <div class="row g-4 mb-4">
+    <div class="col-lg-5">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="mb-0">Komposisi Status {{ $selectedYear }}</h5>
+        </div>
         <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-white mb-0">Total Capaian</h6>
-              <h3 class="text-white mb-0 mt-1 counter-value" data-target="{{ $stats['total'] }}">0</h3>
-            </div>
-            <div class="avatar flex-shrink-0">
-                <span class="avatar-initial rounded bg-white text-primary"><i class="bx bx-file"></i></span>
-            </div>
-          </div>
-          <a href="{{ route('capaian_kabupaten.index') }}" class="text-white small mt-3 d-block opacity-75">Lihat Semua <i class="bx bx-right-arrow-alt"></i></a>
+          <div id="evaluationDonut" style="min-height: 320px;"></div>
         </div>
       </div>
     </div>
-    <div class="col-md-3 col-sm-6 mb-4">
-      <div class="card bg-warning text-white h-100 shadow-sm border-0 card-hover-animate">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-white mb-0">Menunggu</h6>
-              <h3 class="text-white mb-0 mt-1 counter-value" data-target="{{ $stats['menunggu'] }}">0</h3>
-            </div>
-            <div class="avatar flex-shrink-0">
-                <span class="avatar-initial rounded bg-white text-warning"><i class="bx bx-time"></i></span>
-            </div>
-          </div>
-          <a href="{{ route('capaian_kabupaten.index', ['status' => 'Menunggu Verifikasi']) }}" class="text-white small mt-3 d-block opacity-75">Lihat Detail <i class="bx bx-right-arrow-alt"></i></a>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 col-sm-6 mb-4">
-      <div class="card bg-success text-white h-100 shadow-sm border-0 card-hover-animate">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-white mb-0">Terverifikasi</h6>
-              <h3 class="text-white mb-0 mt-1 counter-value" data-target="{{ $stats['terverifikasi'] }}">0</h3>
-            </div>
-            <div class="avatar flex-shrink-0">
-                <span class="avatar-initial rounded bg-white text-success"><i class="bx bx-check-shield"></i></span>
-            </div>
-          </div>
-          <a href="{{ route('capaian_kabupaten.index', ['status' => 'Terverifikasi']) }}" class="text-white small mt-3 d-block opacity-75">Lihat Detail <i class="bx bx-right-arrow-alt"></i></a>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3 col-sm-6 mb-4">
-      <div class="card bg-danger text-white h-100 shadow-sm border-0 card-hover-animate">
-        <div class="card-body">
-          <div class="d-flex justify-content-between align-items-center">
-            <div>
-              <h6 class="text-white mb-0">Ditolak</h6>
-              <h3 class="text-white mb-0 mt-1 counter-value" data-target="{{ $stats['ditolak'] }}">0</h3>
-            </div>
-            <div class="avatar flex-shrink-0">
-                <span class="avatar-initial rounded bg-white text-danger"><i class="bx bx-x-circle"></i></span>
-            </div>
-          </div>
-          <a href="{{ route('capaian_kabupaten.index', ['status' => 'Ditolak']) }}" class="text-white small mt-3 d-block opacity-75">Lihat Detail <i class="bx bx-right-arrow-alt"></i></a>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <div class="row">
-    <!-- Chart (Feature 1) -->
-    <div class="col-lg-8 mb-4">
-      <div class="card h-100 shadow-sm">
+    <div class="col-lg-7">
+      <div class="card h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Distribusi Verifikasi Capaian</h5>
-            <small class="text-muted">Persentase Status</small>
+          <h5 class="mb-0">Peringkat capaian kabupaten/kota {{ $selectedYear }} - {{ $rankBy === 'pilar' ? 'Per Pilar' : 'Per TPB' }}</h5>
+          <div class="btn-group">
+            <a href="{{ route('dashboard.index', ['year' => $selectedYear, 'rank_by' => 'tpb']) }}"
+              class="btn btn-sm {{ $rankBy === 'tpb' ? 'btn-secondary' : 'btn-outline-secondary' }}">
+              Per TPB
+            </a>
+            <a href="{{ route('dashboard.index', ['year' => $selectedYear, 'rank_by' => 'pilar']) }}"
+              class="btn btn-sm {{ $rankBy === 'pilar' ? 'btn-secondary' : 'btn-outline-secondary' }}">
+              Per Pilar
+            </a>
+          </div>
         </div>
         <div class="card-body">
-            <div id="statusPieChart" style="min-height: 350px;"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Recent Activity (Feature 2) -->
-    <div class="col-lg-4 mb-4">
-      <div class="card h-100 shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h5 class="mb-0">Aktivitas Terbaru</h5>
-            <i class="bx bx-dots-vertical-rounded"></i>
-        </div>
-        <div class="card-body">
-            <ul class="p-0 m-0">
-                @foreach($recentActivities as $activity)
-                <li class="d-flex mb-4 pb-1 border-bottom">
-                  <div class="avatar flex-shrink-0 me-3">
-                    <span class="avatar-initial rounded bg-label-secondary">
-                        <i class="bx bx-user"></i>
-                    </span>
-                  </div>
-                  <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
-                    <div class="me-2">
-                      <h6 class="mb-0">{{ $activity->user->name ?? 'User' }}</h6>
-                      <small class="text-muted d-block">Indikator: {{ $activity->indikator->no_indikator ?? '-' }}</small>
-                      <small class="text-xs text-primary">{{ \Carbon\Carbon::parse($activity->updated_at)->diffForHumans() }}</small>
-                    </div>
-                    <div class="user-progress d-flex align-items-center gap-1">
-                        @if($activity->status == 'Terverifikasi')
-                            <span class="badge bg-label-success">Selesai</span>
-                        @elseif($activity->status == 'Ditolak')
-                            <span class="badge bg-label-danger">Ditolak</span>
-                        @else
-                            <span class="badge bg-label-warning">Baru</span>
-                        @endif
-                    </div>
-                  </div>
-                </li>
-                @endforeach
-                @if(count($recentActivities) == 0)
-                <li class="text-center py-5 text-muted">Belum ada aktivitas.</li>
-                @endif
-            </ul>
+          @forelse($ranking as $index => $row)
+            @php
+              $barClass = $row['score'] >= 70 ? 'bg-success' : ($row['score'] >= 50 ? 'bg-warning' : 'bg-danger');
+              $deltaClass = $row['delta'] === null ? 'bg-label-secondary' : ($row['delta'] >= 0 ? 'bg-label-success' : 'bg-label-danger');
+              $deltaText = $row['delta'] === null ? '-' : (($row['delta'] >= 0 ? '+' : '') . $row['delta'] . '%');
+            @endphp
+            <div class="ranking-row d-flex align-items-center gap-3 py-3 {{ !$loop->last ? 'border-bottom' : '' }}">
+              <div class="rank-number">{{ $index + 1 }}</div>
+              <div class="fw-bold flex-grow-1">{{ $row['wilayah'] }}</div>
+              <div class="progress flex-grow-1" style="max-width: 280px; height: 10px;">
+                <div class="progress-bar {{ $barClass }}" style="width: {{ $row['score'] }}%"></div>
+              </div>
+              <div class="fw-bold text-nowrap">{{ $row['score'] }}%</div>
+              <span class="badge {{ $deltaClass }}">{{ $deltaText }}</span>
+            </div>
+          @empty
+            <div class="text-center text-muted py-5">Belum ada data terverifikasi untuk tahun {{ $selectedYear }}.</div>
+          @endforelse
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Table Pengajuan Terbaru -->
-  <div class="card shadow-sm border-0">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h5 class="mb-0">Daftar Pengajuan Capaian Terbaru</h5>
-        <a href="{{ route('capaian_kabupaten.index') }}" class="btn btn-sm btn-primary">Lihat Semua</a>
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Indikator kritis - perlu perhatian segera</h5>
     </div>
     <div class="card-body">
-        <div class="table-responsive text-nowrap">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>No Tiket</th>
-                        <th>Wilayah / OPD</th>
-                        <th>Indikator / RPJMD</th>
-                        <th>Kategori</th>
-                        <th>Status</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="table-border-bottom-0">
-                    @foreach($capaians as $data)
-                    <tr>
-                        <td><code>{{ $data->no_tiket }}</code><br><small class="text-muted">{{ $data->tanggal_kirim }}</small></td>
-                        <td><strong>{{ $data->wilayah }}</strong><br><small>{{ $data->opd }}</small></td>
-                        <td>
-                            <span class="badge bg-label-info">{{ $data->indikator->no_indikator ?? '-' }}</span><br>
-                            <span class="badge bg-label-secondary mt-1">{{ $data->rpjmd->no_indikator_rpjmd ?? '-' }}</span>
-                        </td>
-                        <td>{{ $data->kategori_capaian }}</td>
-                        <td>
-                            @if($data->status == 'Menunggu Verifikasi')
-                                <span class="badge bg-warning">Menunggu</span>
-                            @elseif($data->status == 'Terverifikasi')
-                                <span class="badge bg-success">Terverifikasi</span>
-                            @elseif($data->status == 'Ditolak')
-                                <span class="badge bg-danger">Ditolak</span>
-                            @endif
-                        </td>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-icon btn-outline-primary btn-detail-dash" data-id="{{ $data->id }}"><i class="bx bx-show"></i></button>
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
+      @forelse($criticalIndicators as $item)
+        @php
+          $isDown = $item->evaluasi_delta !== null && $item->evaluasi_delta < 0;
+          $alertClass = $item->evaluasi_status === 'BB' ? 'critical-danger' : ($isDown ? 'critical-warning' : 'critical-success');
+          $icon = $item->evaluasi_status === 'BB' ? 'bx-error' : ($isDown ? 'bx-trending-down' : 'bx-trending-up');
+        @endphp
+        <div class="critical-item {{ $alertClass }} d-flex gap-3 align-items-start mb-3">
+          <i class="bx {{ $icon }} fs-3"></i>
+          <div>
+            <div class="fw-bold">
+              {{ $item->indikator->no_indikator ?? '-' }} {{ $item->indikator->nama_indikator_tpb ?? '-' }}
+            </div>
+            <div>
+              {{ $item->wilayah }}:
+              Capaian {{ $item->evaluasi_capaian ?? '-' }}{{ $item->evaluasi_target !== null ? ', Target ' . $item->evaluasi_target : '' }},
+              GAP {{ $item->evaluasi_gap ?? '-' }},
+              Status {{ $item->evaluasi_status }}
+              @if($item->evaluasi_delta !== null)
+                · Tren {{ $previousYear }} ke {{ $selectedYear }}: {{ $item->evaluasi_delta >= 0 ? '+' : '' }}{{ $item->evaluasi_delta }}
+              @endif
+            </div>
+          </div>
         </div>
+      @empty
+        <div class="text-center text-muted py-5">Tidak ada indikator kritis untuk tahun {{ $selectedYear }}.</div>
+      @endforelse
     </div>
   </div>
-</div>
-
-<!-- Modal Detail -->
-<div class="modal fade" id="modalDetailDash" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Detail Capaian Kabupaten/Kota</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <table class="table table-bordered">
-                    <tr><th width="30%">No Tiket</th><td><code id="detail_no_tiket"></code></td></tr>
-                    <tr><th>Wilayah</th><td id="detail_wilayah"></td></tr>
-                    <tr><th>OPD</th><td id="detail_opd"></td></tr>
-                    <tr><th>TPB</th><td id="detail_tpb"></td></tr>
-                    <tr><th>Target</th><td id="detail_target"></td></tr>
-                    <tr><th>Indikator</th><td id="detail_indikator"></td></tr>
-                    <tr><th>RPJMD</th><td id="detail_rpjmd"></td></tr>
-                    <tr><th>Tahun N-4</th><td id="detail_n4"></td></tr>
-                    <tr><th>Tahun N-3</th><td id="detail_n3"></td></tr>
-                    <tr><th>Tahun N-2</th><td id="detail_n2"></td></tr>
-                    <tr><th>Tahun N-1</th><td id="detail_n1"></td></tr>
-                    <tr><th>Tahun N</th><td id="detail_n"></td></tr>
-                    <tr><th>Gap</th><td id="detail_gap"></td></tr>
-                    <tr><th>Kategori</th><td id="detail_kategori"></td></tr>
-                    <tr><th>Nama Dokumen</th><td id="detail_nama_dokumen"></td></tr>
-                    <tr><th>Jenis Dokumen</th><td id="detail_jenis_dokumen"></td></tr>
-                    <tr><th>Tgl Kirim</th><td id="detail_tgl_kirim"></td></tr>
-                    <tr><th>Tgl Terima</th><td id="detail_tgl_terima"></td></tr>
-                    <tr><th>Status</th><td id="detail_status"></td></tr>
-                    <tr><th>Keterangan Verifikasi</th><td id="detail_keterangan_verifikasi" class="text-danger fw-bold"></td></tr>
-                    <tr><th>File Dokumen</th><td id="detail_files"></td></tr>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <style>
-    .card-hover-animate:hover {
-        transform: translateY(-5px);
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
-    }
-    .text-xs { font-size: 0.75rem; }
+  .kpi-card { background: #fffdf7; border: 1px solid #edf0f5; box-shadow: 0 2px 10px rgba(67, 89, 113, .06); }
+  .kpi-number { font-size: 2.4rem; line-height: 1; font-weight: 800; }
+  .rank-number { width: 38px; color: #f59e0b; font-size: 1.4rem; font-weight: 800; }
+  .ranking-row { min-height: 64px; }
+  .critical-item { border-radius: 8px; padding: 18px; }
+  .critical-danger { background: #fee2e2; color: #8a1f1f; }
+  .critical-warning { background: #fff3d6; color: #7a4d00; }
+  .critical-success { background: #e7f6df; color: #216e33; }
 </style>
 
 @endsection
 
 @section('js')
-<!-- ApexCharts is usually already in Sneat layout, if not we add CDN -->
-<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="{{ asset('sneat/assets/vendor/libs/apex-charts/apexcharts.js') }}"></script>
 <script>
-$(document).ready(function() {
-    // Feature 4: Counter Animation
-    $('.counter-value').each(function() {
-        var $this = $(this),
-            countTo = $this.attr('data-target');
-        $({ countNum: $this.text() }).animate({
-            countNum: countTo
-        }, {
-            duration: 1500,
-            easing: 'linear',
-            step: function() {
-                $this.text(Math.floor(this.countNum));
-            },
-            complete: function() {
-                $this.text(this.countNum);
-            }
-        });
-    });
+document.addEventListener('DOMContentLoaded', function () {
+  const chartEl = document.querySelector('#evaluationDonut');
+  if (!chartEl) return;
 
-    // Feature 1: Pie Chart
-    var options = {
-        series: @json($chartData),
-        chart: {
-            type: 'donut',
-            height: 350
-        },
-        labels: ['Terverifikasi', 'Menunggu', 'Ditolak'],
-        colors: ['#71dd37', '#ffab00', '#ff3e1d'],
-        legend: {
-            position: 'bottom'
-        },
-        plotOptions: {
-            pie: {
-                donut: {
-                    size: '65%',
-                    labels: {
-                        show: true,
-                        total: {
-                            show: true,
-                            label: 'Total Data',
-                            formatter: function (w) {
-                                return w.globals.seriesTotals.reduce((a, b) => a + b, 0)
-                            }
-                        }
-                    }
-                }
+  new ApexCharts(chartEl, {
+    series: @json($chartData),
+    chart: { type: 'donut', height: 320 },
+    labels: ['SS', 'SB', 'BB', 'NA'],
+    colors: ['#22a95a', '#f5a623', '#dc3545', '#9ca3af'],
+    legend: { position: 'bottom' },
+    plotOptions: {
+      pie: {
+        donut: {
+          size: '68%',
+          labels: {
+            show: true,
+            total: {
+              show: true,
+              label: 'Indikator',
+              formatter: function (w) {
+                return w.globals.seriesTotals.reduce((a, b) => a + b, 0);
+              }
             }
-        },
-        responsive: [{
-            breakpoint: 480,
-            options: {
-                chart: {
-                    width: 200
-                },
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }]
-    };
-
-    var chart = new ApexCharts(document.querySelector("#statusPieChart"), options);
-    chart.render();
-
-    // Detail Button Click
-    $('.btn-detail-dash').on('click', function() {
-        var id = $(this).data('id');
-        $.ajax({
-            url: `{{ route('capaian_kabupaten.index') }}/${id}/edit`,
-            type: "GET",
-            success: function(response) {
-                $('#detail_no_tiket').text(response.no_tiket);
-                $('#detail_wilayah').text(response.wilayah);
-                $('#detail_opd').text(response.opd);
-                $('#detail_tpb').text(response.tpb ? response.tpb.no_tpb + ' - ' + response.tpb.nama_tpb : '-');
-                $('#detail_target').text(response.target ? response.target.no_target + ' - ' + response.target.nama_target : '-');
-                $('#detail_indikator').text(response.indikator ? response.indikator.no_indikator + ' - ' + response.indikator.nama_indikator_tpb : '-');
-                $('#detail_rpjmd').text(response.rpjmd ? response.rpjmd.no_indikator_rpjmd + ' - ' + response.rpjmd.indikator_kinerja : '-');
-                $('#detail_n4').text(response.tahun_n4);
-                $('#detail_n3').text(response.tahun_n3);
-                $('#detail_n2').text(response.tahun_n2);
-                $('#detail_n1').text(response.tahun_n1);
-                $('#detail_n').text(response.tahun_n);
-                $('#detail_gap').text(response.gap);
-                $('#detail_kategori').text(response.kategori_capaian);
-                $('#detail_nama_dokumen').text(response.nama_dokumen);
-                $('#detail_jenis_dokumen').text(response.jenis_dokumen);
-                $('#detail_tgl_kirim').text(response.tanggal_kirim);
-                $('#detail_tgl_terima').text(response.tanggal_terima ?? '-');
-                $('#detail_status').text(response.status);
-                $('#detail_keterangan_verifikasi').text(response.keterangan_verifikasi ?? '-');
-                
-                var filesHtml = '';
-                if(response.files) {
-                    var files = JSON.parse(response.files);
-                    files.forEach(function(file) {
-                        filesHtml += `<a href="{{ asset('storage/capaian_dokumen') }}/${file}" target="_blank" class="btn btn-xs btn-outline-info me-1 mt-1"><i class="bx bx-download"></i> ${file}</a>`;
-                    });
-                }
-                $('#detail_files').html(filesHtml || '-');
-                
-                $('#modalDetailDash').modal('show');
-            }
-        });
-    });
+          }
+        }
+      }
+    }
+  }).render();
 });
 </script>
 @endsection

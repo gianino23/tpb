@@ -47,6 +47,8 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('wilayah', WilayahController::class);
 
+    Route::get('/capaian_kabupaten/download-template', [CapaianKabupatenController::class, 'downloadTemplate'])->name('capaian_kabupaten.download-template');
+    Route::post('/capaian_kabupaten/import-excel', [CapaianKabupatenController::class, 'importExcel'])->name('capaian_kabupaten.import-excel');
     Route::resource('capaian_kabupaten', CapaianKabupatenController::class);
     Route::post('/capaian_kabupaten/verify/{id}', [CapaianKabupatenController::class, 'verify'])->name('capaian_kabupaten.verify');
     Route::post('/capaian_kabupaten/reject/{id}', [CapaianKabupatenController::class, 'reject'])->name('capaian_kabupaten.reject');

@@ -27,6 +27,7 @@ class CapaianKabupaten extends Model
         'tanggal_kirim',
         'tanggal_terima',
         'status',
+        'keterangan_verifikasi',
         'files'
     ];
 

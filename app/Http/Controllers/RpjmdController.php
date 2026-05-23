@@ -6,6 +6,8 @@ use App\Models\Tpb;
 use App\Models\Target;
 use App\Models\Indikator;
 use App\Models\Rpjmd;
+use App\Models\Capaian;
+use App\Models\CapaianKabupaten;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Crypt;
@@ -391,6 +393,8 @@ class RpjmdController extends Controller
             }
         }
 
+        $validRows = [];
+
         for ($i = 7; $i < count($rows); $i++) {
             $row = $rows[$i];
             
@@ -453,24 +457,40 @@ class RpjmdController extends Controller
                 }
             }
 
-            // Insert or Update the row
-            Rpjmd::updateOrCreate(
-                [
-                    'wilayah' => $rowWilayah,
-                    'no_indikator_rpjmd' => $noIndikatorRpjmd
-                ],
-                [
-                    'indikator_kinerja' => $indikatorKinerja,
-                    'spm' => $spm ?: '-',
-                    'jenis_urusan' => $jenisUrusan,
-                    'kategori_urusan' => $kategoriUrusan,
-                    'kekhususan_indikator' => $kekhususanIndikator ?: '-',
-                    'referensi' => $referensi ?: '-',
-                    'indikator_sama' => $indikatorSama ?: '-',
-                ]
-            );
+            $validRows[] = [
+                'wilayah' => $rowWilayah,
+                'no_indikator_rpjmd' => $noIndikatorRpjmd,
+                'indikator_kinerja' => $indikatorKinerja,
+                'spm' => $spm ?: '-',
+                'jenis_urusan' => $jenisUrusan,
+                'kategori_urusan' => $kategoriUrusan,
+                'kekhususan_indikator' => $kekhususanIndikator ?: '-',
+                'referensi' => $referensi ?: '-',
+                'indikator_sama' => $indikatorSama ?: '-',
+            ];
+        }
 
-            $successCount++;
+        // Jika terdapat data yang valid untuk diimport
+        if (!empty($validRows)) {
+            $wilayahsToWipe = array_unique(array_column($validRows, 'wilayah'));
+
+            // Dapatkan ID RPJMD yang akan dihapus
+            $rpjmdIdsToWipe = Rpjmd::whereIn('wilayah', $wilayahsToWipe)->pluck('id');
+
+            if ($rpjmdIdsToWipe->count() > 0) {
+                // Hapus data capaian berelasi
+                Capaian::whereIn('rpjmd_id', $rpjmdIdsToWipe)->delete();
+                CapaianKabupaten::whereIn('rpjmd_id', $rpjmdIdsToWipe)->delete();
+                
+                // Hapus data RPJMD lama
+                Rpjmd::whereIn('id', $rpjmdIdsToWipe)->delete();
+            }
+
+            // Simpan seluruh data baru
+            foreach ($validRows as $validRow) {
+                Rpjmd::create($validRow);
+                $successCount++;
+            }
         }
 
         $request->session()->put('import_summary', [

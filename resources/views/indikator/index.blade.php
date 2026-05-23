@@ -88,13 +88,8 @@
                     <br><small class="text-muted">{{ $data->keterangan_verifikasi }}</small>
                 @endif
               </td>
-              <td class="text-center">
+               <td class="text-center">
                     <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
-                        @if(auth()->user()->level == 'Operator Provinsi' && $data->status == 'Menunggu Validasi')
-                            <a href="javascript:void(0)" onclick="verifyData({{ $data->id }})" class="btn btn-success" data-toggle="tooltip" data-placement="top" title="Verify"><i class="tf-icons bx bx-check"></i></a>
-                            <a href="javascript:void(0)" onclick="rejectData({{ $data->id }})" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Reject"><i class="tf-icons bx bx-x"></i></a>
-                        @endif
-                        
                         @if(auth()->user()->level == 'Administrator' || auth()->user()->level == 'Operator Kabupaten/Kota')
                             <a href="javascript:void(0)" id="btn-edit-post" data-id="{{ $data->id }}" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="Edit"><i class="tf-icons bx bx-copy"></i></a>
                             <a href="javascript:void(0)" id="btn-delete-post" data-id="{{ $data->id }}" class="btn btn-danger" data-toggle="tooltip" data-placement="top" title="Delete"><i class="tf-icons bx bx-trash"></i></a>

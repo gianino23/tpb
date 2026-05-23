@@ -78,6 +78,153 @@
         -ms-user-select: none;
         user-select: none;
       }
+      .app-shell-brand {
+        min-height: 96px;
+        padding: 18px 24px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .app-shell-brand img {
+        width: 58px;
+        height: 58px;
+        object-fit: contain;
+      }
+      .layout-navbar {
+        min-height: 64px;
+        margin-top: 1rem;
+        margin-bottom: .5rem;
+        border-radius: .75rem;
+        box-shadow: 0 .125rem .5rem rgba(67, 89, 113, .08);
+      }
+      .navbar-title {
+        min-width: 0;
+      }
+      .navbar-title-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #eef2ff;
+        color: #696cff;
+        flex: 0 0 auto;
+      }
+      .navbar-title strong {
+        display: block;
+        color: #566a7f;
+        line-height: 1.2;
+      }
+      .navbar-title span {
+        display: block;
+        color: #a1acb8;
+        font-size: .8125rem;
+        line-height: 1.2;
+      }
+      .navbar-meta {
+        gap: .5rem;
+      }
+      .navbar-meta .badge {
+        border-radius: 999px;
+        font-weight: 500;
+        padding: .45rem .7rem;
+      }
+      .navbar-user-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .65rem;
+        padding: .35rem .45rem .35rem .75rem;
+        border: 1px solid #edf0f5;
+        border-radius: 999px;
+        background: #fff;
+        color: #566a7f;
+      }
+      .navbar-user-pill:hover {
+        background: #f8f9fb;
+        color: #566a7f;
+      }
+      .navbar-user-text {
+        line-height: 1.1;
+        text-align: right;
+      }
+      .navbar-user-text strong {
+        display: block;
+        font-size: .875rem;
+      }
+      .navbar-user-text span {
+        display: block;
+        font-size: .75rem;
+        color: #a1acb8;
+        margin-top: .15rem;
+      }
+      .layout-page {
+        padding-left: .75rem;
+        padding-right: .75rem;
+      }
+      .layout-page .container-xxl {
+        max-width: 100%;
+      }
+      .content-wrapper > .container-xxl {
+        padding-top: 1rem !important;
+      }
+      .dropdown-user .dropdown-menu {
+        min-width: 230px;
+      }
+      .footer .container-xxl {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+      }
+      @media (max-width: 1199.98px) {
+        .layout-page {
+          padding-left: .75rem;
+          padding-right: .75rem;
+        }
+        .layout-navbar {
+          margin: .75rem 0 .25rem;
+        }
+      }
+      @media (max-width: 767.98px) {
+        html, body {
+          overflow-x: hidden;
+        }
+        .layout-page {
+          padding-left: .5rem;
+          padding-right: .5rem;
+        }
+        .layout-navbar {
+          min-height: 58px;
+          border-radius: .65rem;
+        }
+        .navbar-title strong {
+          font-size: .95rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 58vw;
+        }
+        .navbar-title span {
+          display: none;
+        }
+        .navbar-title-icon {
+          width: 34px;
+          height: 34px;
+          border-radius: 8px;
+        }
+        .navbar-meta,
+        .navbar-user-text {
+          display: none !important;
+        }
+        .content-wrapper > .container-xxl {
+          padding-left: .75rem !important;
+          padding-right: .75rem !important;
+        }
+        .footer .container-xxl {
+          padding-left: .75rem;
+          padding-right: .75rem;
+          font-size: .8rem;
+        }
+      }
     </style>
     
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
@@ -91,7 +238,11 @@
         <!-- Menu -->
 
         <aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
-          <div class="app-brand demo">
+          <div class="app-brand demo app-shell-brand">
+            <a href="{{ route('dashboard.index') }}" class="app-brand-link d-flex flex-column align-items-center text-center">
+              <img src="{{ url('storage/provkalsel.jpeg') }}" alt="Provinsi Kalimantan Selatan" />
+              <span class="app-brand-text demo menu-text fw-bold mt-2" style="font-size:.9rem;letter-spacing:0;color:#566a7f;">E-TPB</span>
+            </a>
               <!--
             <a href="#" class="app-brand-link">
                 
@@ -159,11 +310,14 @@
               <i class="bx bx-chevron-left bx-sm align-middle"></i>
             </a>
             -->
+            <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none position-absolute" style="right:12px;top:14px;">
+              <i class="bx bx-x bx-sm align-middle"></i>
+            </a>
           </div>
          
              
          
-<center><img src="{{ url('storage/provkalsel.jpeg') }}" style="width:50px;margin-top:-100px;margin-bottom:-30px;" class="" /></center>
+          <div class="text-center mb-3 d-none"></div>
           <ul class="menu-inner py-1">
             <!-- Dashboard -->
             <li class="menu-item {{ Request::is('dashboard*') ? 'active' : '' }}">
@@ -613,25 +767,32 @@
             </div>
 
             <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
-              <!-- Search -->
-             
-              <div class="navbar-nav align-items-center">
-               
-                <div class="nav-item d-flex align-items-center">
-                  
-                 
-
+              <div class="navbar-nav align-items-center flex-grow-1 overflow-hidden">
+                <div class="nav-item d-flex align-items-center navbar-title gap-3">
+                  <div class="navbar-title-icon">
+                    <i class="bx bx-line-chart fs-4"></i>
+                  </div>
+                  <div class="overflow-hidden">
+                    <strong>Sistem Informasi Pemantauan TPB</strong>
+                    <span>Dinas Lingkungan Hidup Provinsi Kalimantan Selatan</span>
+                  </div>
+                  <div class="navbar-meta d-none d-lg-flex align-items-center ms-2">
+                    <span class="badge bg-label-primary">{{ auth()->user()->level }}</span>
+                    @if(auth()->user()->wilayah)
+                      <span class="badge bg-label-success">{{ auth()->user()->wilayah }}</span>
+                    @endif
+                    <span class="badge bg-label-secondary">{{ now()->format('d M Y') }}</span>
+                  </div>
                 </div>
               </div>
-              <!-- /Search -->
               
               <ul class="navbar-nav flex-row align-items-center ms-auto">
-                <!-- Place this tag where you want the button to render. -->
-               
-
-                <!-- User -->
                 <li class="nav-item navbar-dropdown dropdown-user dropdown">
-                  <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
+                  <a class="nav-link dropdown-toggle hide-arrow navbar-user-pill" href="javascript:void(0);" data-bs-toggle="dropdown">
+                    <div class="navbar-user-text">
+                      <strong>{{ auth()->user()->name }}</strong>
+                      <span>{{ auth()->user()->level }}</span>
+                    </div>
                     <div class="avatar avatar-online">
                     <?php
                               $user = \App\Models\User::where('id',auth()->user()->id)->first();
@@ -668,7 +829,6 @@
                     </li>
                   </ul>
                 </li>
-                <!--/ User -->
               </ul>
             </div>
           </nav>

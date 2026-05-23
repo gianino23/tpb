@@ -49,7 +49,171 @@
         </div>
     </div>
 
+    {{-- ===== IMPORT EXCEL SECTION (Operator Kabupaten/Kota only) ===== --}}
+    @if(auth()->user()->level == 'Operator Kabupaten/Kota')
+    <div class="card mb-4" style="border-top: 4px solid #1D4ED8;">
+        <div class="card-header py-3" style="background: linear-gradient(135deg, #1B2A4A 0%, #1D4ED8 100%);">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bx bx-upload text-white" style="font-size:1.4rem"></i>
+                    <div>
+                        <h5 class="mb-0 text-white fw-bold">Upload Capaian Indikator TPB via Excel</h5>
+                        <small class="text-white opacity-75">
+                            <i class="bx bx-check-circle"></i>
+                            {{ \App\Models\Indikator::where('status','Terverifikasi')->count() }} indikator tersedia dari Admin — tinggal upload capaian
+                        </small>
+                    </div>
+                </div>
+                <span class="badge bg-light text-dark fw-normal">
+                    <i class="bx bx-info-circle"></i> Upload menggantikan seluruh data capaian Anda sebelumnya
+                </span>
+            </div>
+        </div>
+        <div class="card-body py-4">
+
+            {{-- Import Summary --}}
+            @if(session('import_capaian_summary'))
+            @php $sum = session('import_capaian_summary'); @endphp
+            <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+                <strong><i class="bx bx-bar-chart-alt-2"></i> Hasil Import Capaian Tahun {{ $sum['year'] }}</strong>
+                <div class="mt-1">
+                    ✅ Berhasil: <strong>{{ $sum['success'] }}</strong> baris &nbsp;|&nbsp;
+                    ❌ Gagal: <strong>{{ $sum['failed'] }}</strong> baris &nbsp;|&nbsp;
+                    Disimpan ke kolom: <code>{{ $sum['field'] }}</code>
+                </div>
+                @if(count($sum['errors']) > 0)
+                <hr class="my-2">
+                <ul class="mb-0 small">
+                    @foreach($sum['errors'] as $err)
+                    <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
+                @endif
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+
+            {{-- Step Progress Bar --}}
+            <div class="d-flex align-items-center mb-4 gap-0">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:32px;height:32px;background:#1D4ED8;font-size:14px;">1</div>
+                    <span class="fw-semibold small">Unduh Template</span>
+                </div>
+                <div style="flex:1;height:2px;background:#dee2e6;margin:0 10px;"></div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:32px;height:32px;background:#F59E0B;font-size:14px;">2</div>
+                    <span class="fw-semibold small">Isi Capaian di Excel</span>
+                </div>
+                <div style="flex:1;height:2px;background:#dee2e6;margin:0 10px;"></div>
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white" style="width:32px;height:32px;background:#059669;font-size:14px;">3</div>
+                    <span class="fw-semibold small">Upload Kembali</span>
+                </div>
+            </div>
+
+            <div class="row g-3">
+
+                {{-- STEP 1: Download Template --}}
+                <div class="col-md-4">
+                    <div class="border rounded-3 p-4 h-100" style="border-color: #BFDBFE !important; background: #EFF6FF;">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width:28px;height:28px;min-width:28px;background:#1D4ED8;font-size:13px;">1</div>
+                            <strong class="text-dark">Unduh Template Excel</strong>
+                        </div>
+                        <p class="small text-muted mb-3">Template sudah berisi <strong>{{ \App\Models\Indikator::where('status','Terverifikasi')->count() }} nama indikator</strong>, target nasional, satuan, GAP, status, dan rekap. Anda hanya perlu mengisi kolom <span class="fw-bold text-primary">★ Capaian</span>.</p>
+                        <form action="{{ route('capaian_kabupaten.download-template') }}" method="GET">
+                            <div class="mb-2">
+                                <label class="form-label small mb-1 fw-semibold">Pilih Tahun Data</label>
+                                <select name="year" id="dl-year" class="form-select form-select-sm">
+                                    @for($y = date('Y'); $y >= date('Y')-4; $y--)
+                                        <option value="{{ $y }}">{{ $y }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm w-100 mt-1">
+                                <i class="bx bx-download me-1"></i> Unduh template_capaian_<span id="dl-year-label">{{ date('Y') }}</span>.xlsx
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                {{-- STEP 2: Instructions --}}
+                <div class="col-md-4">
+                    <div class="border rounded-3 p-4 h-100" style="border-color: #FDE68A !important; background: #FFFBEB;">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width:28px;height:28px;min-width:28px;background:#F59E0B;font-size:13px;">2</div>
+                            <strong class="text-dark">Isi Kolom Capaian di Excel</strong>
+                        </div>
+                        <p class="small text-muted mb-2">Buka file yang diunduh, isi <strong>hanya kolom berwarna biru (★ Capaian)</strong>. Kolom lain sudah terisi otomatis dari sistem.</p>
+                        <div class="small">
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge" style="background:#DBEAFE;color:#1D4ED8;border:1px solid #93C5FD;">Kolom Biru</span>
+                                <span class="text-muted">= wajib isi (★ CAPAIAN)</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2 mb-1">
+                                <span class="badge bg-light text-dark border">Kolom Putih</span>
+                                <span class="text-muted">= dari sistem, jangan ubah</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge" style="background:#D1FAE5;color:#059669;border:1px solid #6EE7B7;">Kolom Hijau</span>
+                                <span class="text-muted">= dihitung otomatis (GAP & Status)</span>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge" style="background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;">Kolom Coklat</span>
+                                <span class="text-muted">= opsional (Sumber Data & Catatan)</span>
+                            </div>
+                        </div>
+                        <hr class="my-2">
+                        <small class="text-muted"><i class="bx bx-info-circle text-warning"></i> Simpan sebagai <strong>.xlsx</strong> sebelum upload.</small>
+                    </div>
+                </div>
+
+                {{-- STEP 3: Upload --}}
+                <div class="col-md-4">
+                    <div class="border rounded-3 p-4 h-100" style="border-color: #A7F3D0 !important; background: #F0FDF4;">
+                        <div class="d-flex align-items-center gap-2 mb-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold" style="width:28px;height:28px;min-width:28px;background:#059669;font-size:13px;">3</div>
+                            <strong class="text-dark">Upload File yang Sudah Diisi</strong>
+                        </div>
+                        <p class="small text-muted mb-3">Format: <code>.xlsx</code> · Maks 10MB · Hanya file dari template resmi sistem.</p>
+                        <form action="{{ route('capaian_kabupaten.import-excel') }}" method="POST" enctype="multipart/form-data" id="importCapaianForm">
+                            @csrf
+                            <div class="mb-2">
+                                <label class="form-label small mb-1 fw-semibold">Tahun Data</label>
+                                <select name="year" class="form-select form-select-sm" required>
+                                    @for($y = date('Y'); $y >= date('Y')-4; $y--)
+                                        <option value="{{ $y }}">{{ $y }}</option>
+                                    @endfor
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label small mb-1 fw-semibold">File Excel (.xlsx / .xls)</label>
+                                <div id="drop-zone" class="border rounded-2 d-flex flex-column align-items-center justify-content-center p-3 text-center"
+                                    style="border-style:dashed!important;cursor:pointer;min-height:90px;transition:background 0.2s;"
+                                    onclick="document.getElementById('capaian-file-input').click()"
+                                    ondragover="event.preventDefault();this.style.background='#DCFCE7'"
+                                    ondragleave="this.style.background=''"
+                                    ondrop="handleDrop(event)">
+                                    <i class="bx bx-cloud-upload mb-1" style="font-size:1.8rem;color:#059669;"></i>
+                                    <span class="small text-muted" id="drop-label">Klik atau drag & drop file Excel</span>
+                                </div>
+                                <input type="file" id="capaian-file-input" name="file" accept=".xlsx,.xls" class="d-none" required onchange="updateDropLabel(this)">
+                            </div>
+                            <button type="submit" class="btn btn-success btn-sm w-100 mt-1" id="importBtn">
+                                <i class="bx bx-upload me-1"></i> Proses Upload
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>{{-- end row --}}
+        </div>
+    </div>
+    @endif
+    {{-- ===== END IMPORT EXCEL SECTION ===== --}}
+
     <div class="card">
+
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-md-4 mb-3">
@@ -84,9 +248,9 @@
                             <th>No Tiket</th>
                             <th>Wilayah</th>
                             <th>OPD</th>
-                            <th>Kategori</th>
-                            <th>Nama Dokumen</th>
-                            <th>Jenis</th>
+                            <th>Status Capaian</th>
+                            <th>Sumber Data</th>
+                            <th>Catatan</th>
                             <th>Tgl Kirim</th>
                             <th>Tgl Terima</th>
                             <th>Status</th>
@@ -100,7 +264,17 @@
                             <td><code>{{ $data->no_tiket }}</code></td>
                             <td>{{ $data->wilayah }}</td>
                             <td>{{ $data->opd }}</td>
-                            <td>{{ $data->kategori_capaian }}</td>
+                            <td>
+                                @if($data->kategori_capaian == 'SS')
+                                    <span class="badge bg-success">Tercapai (SS)</span>
+                                @elseif($data->kategori_capaian == 'SB')
+                                    <span class="badge bg-warning">Dalam Proses (SB)</span>
+                                @elseif($data->kategori_capaian == 'BB')
+                                    <span class="badge bg-danger">Belum Tercapai (BB)</span>
+                                @else
+                                    {{ $data->kategori_capaian }}
+                                @endif
+                            </td>
                             <td>{{ $data->nama_dokumen }}</td>
                             <td>{{ $data->jenis_dokumen }}</td>
                             <td>{{ $data->tanggal_kirim ? \Carbon\Carbon::parse($data->tanggal_kirim)->format('d-m-Y H:i') : '-' }}</td>
@@ -172,7 +346,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data TPB</label>
+                            <label class="form-label">TPB</label>
                             <select name="tpb_id" class="form-control select2" required>
                                 <option value="" disabled selected>Pilih TPB</option>
                                 @foreach($tpbs as $t)
@@ -181,20 +355,20 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Target RPJMD</label>
+                            <label class="form-label">Kode / Nama Indikator</label>
                             <select name="indikator_id" class="form-control select2" required>
-                                <option value="" disabled selected>Pilih Target RPJMD</option>
+                                <option value="" disabled selected>Pilih Indikator TPB</option>
                                 @foreach($indikators as $t)
-                                    <option value="{{ $t->id }}">{{ $t->no_indikator }} - {{ $t->target_rpjmd }}</option>
+                                    <option value="{{ $t->id }}">{{ $t->no_indikator }} - {{ $t->nama_indikator_tpb }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Indikator TPB</label>
+                            <label class="form-label">Target Nasional</label>
                             <select name="target_id" class="form-control select2" required>
-                                <option value="" disabled selected>Pilih Indikator TPB</option>
+                                <option value="" disabled selected>Pilih Target Nasional</option>
                                 @foreach($targets as $t)
                                     <option value="{{ $t->id }}">{{ $t->no_target }} - {{ $t->nama_target }}</option>
                                 @endforeach
@@ -217,53 +391,49 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Tahun N-4</label>
-                            <input type="text" name="tahun_n4" class="form-control" required>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tahun Data</label>
+                            <select name="year" id="manual-year" class="form-control select2" required>
+                                @for($y = date('Y'); $y >= date('Y')-4; $y--)
+                                    <option value="{{ $y }}">{{ $y }}</option>
+                                @endfor
+                            </select>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Tahun N-3</label>
-                            <input type="text" name="tahun_n3" class="form-control" required>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Satuan</label>
+                            <input type="text" class="form-control" placeholder="Contoh: % / Indeks / Dokumen">
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Tahun N-2</label>
-                            <input type="text" name="tahun_n2" class="form-control" required>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label class="form-label">★ Capaian <span id="manual-year-label">{{ date('Y') }}</span></label>
+                            <input type="text" name="capaian_manual" class="form-control" placeholder="Contoh: 74.60 / Ada / Belum" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Tahun N-1</label>
-                            <input type="text" name="tahun_n1" class="form-control" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Tahun N</label>
-                            <input type="text" name="tahun_n" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Gap dg Target RPJMN 2019</label>
+                            <label class="form-label">GAP</label>
                             <input type="text" name="gap" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Kategori Capaian</label>
-                            <input type="text" name="kategori_capaian" class="form-control" required>
+                            <label class="form-label">Status</label>
+                            <select name="kategori_capaian" class="form-control select2" required>
+                                <option value="" disabled selected>Pilih Status</option>
+                                <option value="SS">Tercapai (SS)</option>
+                                <option value="SB">Dalam Proses (SB)</option>
+                                <option value="BB">Belum Tercapai (BB)</option>
+                            </select>
                         </div>
                     </div>
                     <hr>
                     <div class="row">
-                        <div class="col-md-8 mb-3">
-                            <label class="form-label">Nama Dokumen</label>
-                            <input type="text" name="nama_dokumen" class="form-control" placeholder="Masukkan nama dokumen" required>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Sumber Data</label>
+                            <input type="text" name="nama_dokumen" class="form-control" placeholder="Contoh: BPS / Dinas terkait">
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Jenis Dokumen</label>
-                            <select name="jenis_dokumen" class="form-control select2" required>
-                                <option value="" disabled selected>Pilih jenis dokumen</option>
-                                <option value="Laporan Capaian">Laporan Capaian</option>
-                                <option value="Data Pendukung">Data Pendukung</option>
-                                <option value="Dokumen Lainnya">Dokumen Lainnya</option>
-                            </select>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Catatan Tambahan</label>
+                            <input type="text" name="jenis_dokumen" class="form-control" placeholder="Opsional">
                         </div>
                     </div>
                     <div class="row">
@@ -297,7 +467,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data TPB</label>
+                            <label class="form-label">TPB</label>
                             <select name="tpb_id" id="edit_tpb_id" class="form-control select2-edit" required>
                                 @foreach($tpbs as $t)
                                     <option value="{{ $t->id }}">{{ $t->no_tpb }} - {{ $t->nama_tpb }}</option>
@@ -305,17 +475,17 @@
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Target RPJMD</label>
+                            <label class="form-label">Kode / Nama Indikator</label>
                             <select name="indikator_id" id="edit_indikator_id" class="form-control select2-edit" required>
                                 @foreach($indikators as $t)
-                                    <option value="{{ $t->id }}">{{ $t->no_indikator }} - {{ $t->target_rpjmd }}</option>
+                                    <option value="{{ $t->id }}">{{ $t->no_indikator }} - {{ $t->nama_indikator_tpb }}</option>
                                 @endforeach
                             </select>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Data Indikator TPB</label>
+                            <label class="form-label">Target Nasional</label>
                             <select name="target_id" id="edit_target_id" class="form-control select2-edit" required>
                                 @foreach($targets as $t)
                                     <option value="{{ $t->id }}">{{ $t->no_target }} - {{ $t->nama_target }}</option>
@@ -338,52 +508,48 @@
                         </div>
                     </div>
                     <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Tahun N-4</label>
-                            <input type="text" name="tahun_n4" id="edit_tahun_n4" class="form-control" required>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tahun Data</label>
+                            <select name="year" id="edit_year" class="form-control select2-edit" required>
+                                @for($y = date('Y'); $y >= date('Y')-4; $y--)
+                                    <option value="{{ $y }}">{{ $y }}</option>
+                                @endfor
+                            </select>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Tahun N-3</label>
-                            <input type="text" name="tahun_n3" id="edit_tahun_n3" class="form-control" required>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Satuan</label>
+                            <input type="text" class="form-control" placeholder="Contoh: % / Indeks / Dokumen">
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Tahun N-2</label>
-                            <input type="text" name="tahun_n2" id="edit_tahun_n2" class="form-control" required>
+                    </div>
+                    <div class="row">
+                        <div class="col mb-3">
+                            <label class="form-label">★ Capaian <span id="edit_year_label">{{ date('Y') }}</span></label>
+                            <input type="text" name="capaian_manual" id="edit_capaian_manual" class="form-control" required>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Tahun N-1</label>
-                            <input type="text" name="tahun_n1" id="edit_tahun_n1" class="form-control" required>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Tahun N</label>
-                            <input type="text" name="tahun_n" id="edit_tahun_n" class="form-control" required>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Gap dg Target RPJMN 2019</label>
+                            <label class="form-label">GAP</label>
                             <input type="text" name="gap" id="edit_gap" class="form-control" required>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Kategori Capaian</label>
-                            <input type="text" name="kategori_capaian" id="edit_kategori_capaian" class="form-control" required>
+                            <label class="form-label">Status</label>
+                            <select name="kategori_capaian" id="edit_kategori_capaian" class="form-control select2-edit" required>
+                                <option value="SS">Tercapai (SS)</option>
+                                <option value="SB">Dalam Proses (SB)</option>
+                                <option value="BB">Belum Tercapai (BB)</option>
+                            </select>
                         </div>
                     </div>
                     <hr>
                     <div class="row">
-                        <div class="col-md-8 mb-3">
-                            <label class="form-label">Nama Dokumen</label>
-                            <input type="text" name="nama_dokumen" id="edit_nama_dokumen" class="form-control" required>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Sumber Data</label>
+                            <input type="text" name="nama_dokumen" id="edit_nama_dokumen" class="form-control">
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label">Jenis Dokumen</label>
-                            <select name="jenis_dokumen" id="edit_jenis_dokumen" class="form-control select2-edit" required>
-                                <option value="Laporan Capaian">Laporan Capaian</option>
-                                <option value="Data Pendukung">Data Pendukung</option>
-                                <option value="Dokumen Lainnya">Dokumen Lainnya</option>
-                            </select>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Catatan Tambahan</label>
+                            <input type="text" name="jenis_dokumen" id="edit_jenis_dokumen" class="form-control">
                         </div>
                     </div>
                     <div class="row">
@@ -443,18 +609,18 @@
                     <tr><th>Wilayah</th><td id="detail_wilayah"></td></tr>
                     <tr><th>OPD</th><td id="detail_opd"></td></tr>
                     <tr><th>TPB</th><td id="detail_tpb"></td></tr>
-                    <tr><th>Target RPJMD</th><td id="detail_indikator"></td></tr>
-                    <tr><th>Indikator TPB</th><td id="detail_target"></td></tr>
+                    <tr><th>Kode / Nama Indikator</th><td id="detail_indikator"></td></tr>
+                    <tr><th>Target Nasional</th><td id="detail_target"></td></tr>
                     <tr><th>RPJMD</th><td id="detail_rpjmd"></td></tr>
                     <tr><th>Tahun N-4</th><td id="detail_n4"></td></tr>
                     <tr><th>Tahun N-3</th><td id="detail_n3"></td></tr>
                     <tr><th>Tahun N-2</th><td id="detail_n2"></td></tr>
                     <tr><th>Tahun N-1</th><td id="detail_n1"></td></tr>
-                    <tr><th>Tahun N</th><td id="detail_n"></td></tr>
+                    <tr><th>★ Capaian Tahun N</th><td id="detail_n"></td></tr>
                     <tr><th>Gap</th><td id="detail_gap"></td></tr>
-                    <tr><th>Kategori</th><td id="detail_kategori"></td></tr>
-                    <tr><th>Nama Dokumen</th><td id="detail_nama_dokumen"></td></tr>
-                    <tr><th>Jenis Dokumen</th><td id="detail_jenis_dokumen"></td></tr>
+                    <tr><th>Status Capaian</th><td id="detail_kategori"></td></tr>
+                    <tr><th>Sumber Data</th><td id="detail_nama_dokumen"></td></tr>
+                    <tr><th>Catatan Tambahan</th><td id="detail_jenis_dokumen"></td></tr>
                     <tr><th>Tgl Kirim</th><td id="detail_tgl_kirim"></td></tr>
                     <tr><th>Tgl Terima</th><td id="detail_tgl_terima"></td></tr>
                     <tr><th>Status</th><td id="detail_status"></td></tr>
@@ -473,7 +639,52 @@
 
 @section('js')
 <script>
+    // ===== Import Excel Helpers =====
+    function updateDropLabel(input) {
+        const label = document.getElementById('drop-label');
+        const zone  = document.getElementById('drop-zone');
+        if (input.files && input.files[0]) {
+            label.textContent = '✅ ' + input.files[0].name;
+            zone.style.background = '#DCFCE7';
+        }
+    }
+
+    function handleDrop(event) {
+        event.preventDefault();
+        const zone  = document.getElementById('drop-zone');
+        const input = document.getElementById('capaian-file-input');
+        const files = event.dataTransfer.files;
+        if (files.length > 0) {
+            input.files = files;
+            updateDropLabel(input);
+        }
+        zone.style.background = '';
+    }
+
+    // Update download button label when year changes
+    document.addEventListener('DOMContentLoaded', function () {
+        const dlYear = document.getElementById('dl-year');
+        const dlLabel = document.getElementById('dl-year-label');
+        if (dlYear && dlLabel) {
+            dlYear.addEventListener('change', function () {
+                dlLabel.textContent = this.value;
+            });
+        }
+
+        // Show loading state on import form submit
+        const importForm = document.getElementById('importCapaianForm');
+        if (importForm) {
+            importForm.addEventListener('submit', function () {
+                const btn = document.getElementById('importBtn');
+                btn.disabled = true;
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Memproses...';
+            });
+        }
+    });
+    // ===== End Import Excel Helpers =====
+
     $(document).ready(function() {
+
         $('.select2').select2({
             theme: 'bootstrap-5',
             dropdownParent: $('#modalCreate'),
@@ -484,6 +695,14 @@
             theme: 'bootstrap-5',
             dropdownParent: $('#modalEdit'),
             width: '100%'
+        });
+
+        $('#manual-year').on('change', function() {
+            $('#manual-year-label').text(this.value);
+        });
+
+        $('#edit_year').on('change', function() {
+            $('#edit_year_label').text(this.value);
         });
 
         // Edit Button Click
@@ -499,15 +718,21 @@
                     $('#edit_indikator_id').val(data.indikator_id).trigger('change');
                     $('#edit_rpjmd_id').val(data.rpjmd_id).trigger('change');
                     $('#edit_opd').val(data.opd);
-                    $('#edit_tahun_n4').val(data.tahun_n4);
-                    $('#edit_tahun_n3').val(data.tahun_n3);
-                    $('#edit_tahun_n2').val(data.tahun_n2);
-                    $('#edit_tahun_n1').val(data.tahun_n1);
-                    $('#edit_tahun_n').val(data.tahun_n);
+                    const currentYear = new Date().getFullYear();
+                    const yearFields = [
+                        { year: currentYear, value: data.tahun_n },
+                        { year: currentYear - 1, value: data.tahun_n1 },
+                        { year: currentYear - 2, value: data.tahun_n2 },
+                        { year: currentYear - 3, value: data.tahun_n3 },
+                        { year: currentYear - 4, value: data.tahun_n4 },
+                    ];
+                    const filledYear = yearFields.find(item => item.value && item.value !== '-');
+                    $('#edit_year').val(filledYear ? filledYear.year : currentYear).trigger('change');
+                    $('#edit_capaian_manual').val(filledYear ? filledYear.value : '');
                     $('#edit_gap').val(data.gap);
-                    $('#edit_kategori_capaian').val(data.kategori_capaian);
+                    $('#edit_kategori_capaian').val(data.kategori_capaian).trigger('change');
                     $('#edit_nama_dokumen').val(data.nama_dokumen);
-                    $('#edit_jenis_dokumen').val(data.jenis_dokumen).trigger('change');
+                    $('#edit_jenis_dokumen').val(data.jenis_dokumen);
                     
                     $('#modalEdit').modal('show');
                 }
@@ -534,7 +759,12 @@
                     $('#detail_n1').text(data.tahun_n1);
                     $('#detail_n').text(data.tahun_n);
                     $('#detail_gap').text(data.gap);
-                    $('#detail_kategori').text(data.kategori_capaian);
+                    const statusCapaianLabels = {
+                        SS: 'Tercapai (SS)',
+                        SB: 'Dalam Proses (SB)',
+                        BB: 'Belum Tercapai (BB)'
+                    };
+                    $('#detail_kategori').text(statusCapaianLabels[data.kategori_capaian] || data.kategori_capaian || '-');
                     $('#detail_nama_dokumen').text(data.nama_dokumen);
                     $('#detail_jenis_dokumen').text(data.jenis_dokumen);
                     $('#detail_tgl_kirim').text(data.tanggal_kirim);
@@ -578,6 +808,10 @@
 
         function submitReview(action) {
             var url = action == 'verify' ? "{{ route('capaian_kabupaten.verify', ':id') }}".replace(':id', currentReviewId) : "{{ route('capaian_kabupaten.reject', ':id') }}".replace(':id', currentReviewId);
+            var $button = action == 'verify' ? $('#btnVerify') : $('#btnReject');
+            var originalText = $button.html();
+
+            $button.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-1"></span> Memproses...');
             $.ajax({
                 url: url,
                 type: 'POST',
@@ -588,8 +822,12 @@
                 success: function(response) {
                     location.reload();
                 },
-                error: function() {
-                    alert('Terjadi kesalahan saat memproses data.');
+                error: function(xhr) {
+                    const message = xhr.responseJSON && xhr.responseJSON.message
+                        ? xhr.responseJSON.message
+                        : 'Terjadi kesalahan saat memproses data.';
+                    alert(message);
+                    $button.prop('disabled', false).html(originalText);
                 }
             });
         }

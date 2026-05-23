@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Tpb;
 use App\Models\Target;
 use App\Models\Indikator;
+use App\Models\Capaian;
+use App\Models\CapaianKabupaten;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Crypt;
@@ -67,7 +69,7 @@ class IndikatorController extends Controller
             'kewenangan_kabupaten'     => $request->kewenangan_kabupaten, 
             'kewenangan_kota'     => $request->kewenangan_kota, 
             'user_id'            => Auth::id(),
-            'status'             => 'Menunggu Validasi',
+            'status'             => 'Terverifikasi',
         ]);
 
         //return response
@@ -93,11 +95,8 @@ class IndikatorController extends Controller
         $warningCount = 0;
         $failedCount = 0;
         $errors = [];
+        $validRows = [];
 
-        // Data starts at row 5 (index 4) if headers are kept up to row 4.
-        // The instruction says "MULAI ISI DATA DI BAWAH BARIS INI (hapus baris contoh no.5 dan 6 sebelum upload)"
-        // It implies row 7 is where data starts if examples are not deleted, or row 5 if deleted.
-        // We will just skip rows that don't look like valid data or check from row 5 onwards.
         for ($i = 4; $i < count($rows); $i++) {
             $row = $rows[$i];
             
@@ -142,17 +141,12 @@ class IndikatorController extends Controller
                 continue;
             }
 
-            // Warning for format on Catatan
-            $hasWarning = false;
-            // Format check: Capaian [nilai] | GAP [nilai] | Status: SS/SB/BB/NA
-            if (!preg_match('/Capaian.*\|.*GAP.*\|.*Status:/i', $catatan)) {
-                $hasWarning = true;
-                $warningCount++;
-            } else {
-                $successCount++;
-            }
+            // Cek format catatan untuk warning
+            $hasWarning = !preg_match('/Capaian.*\|.*GAP.*\|.*Status:/i', $catatan);
 
-            Indikator::create([
+            $validRows[] = [
+                '_target_id'                 => $target->id,
+                '_has_warning'               => $hasWarning,
                 'target_id'                  => $target->id,
                 'no_indikator'               => $target->no_target,
                 'nama_indikator_tpb'         => $target->nama_target,
@@ -165,8 +159,31 @@ class IndikatorController extends Controller
                 'kewenangan_kabupaten'       => (strtolower($kewenanganKab) == 'ya') ? 'Kabupaten' : '-',
                 'kewenangan_kota'            => (strtolower($kewenanganKota) == 'ya') ? 'Kota' : '-',
                 'user_id'                    => Auth::id(),
-                'status'                     => 'Menunggu Validasi',
-            ]);
+                'status'                     => 'Terverifikasi',
+            ];
+        }
+
+        // Jika terdapat data yang valid untuk diimport
+        if (!empty($validRows)) {
+            // Hapus SEMUA data Indikator lama beserta relasi capaian-nya
+            $semuaIndikatorIds = Indikator::pluck('id');
+
+            if ($semuaIndikatorIds->count() > 0) {
+                Capaian::whereIn('indikator_id', $semuaIndikatorIds)->delete();
+                CapaianKabupaten::whereIn('indikator_id', $semuaIndikatorIds)->delete();
+                Indikator::whereIn('id', $semuaIndikatorIds)->delete();
+            }
+
+            // Simpan seluruh data baru
+            foreach ($validRows as $validRow) {
+                if ($validRow['_has_warning']) {
+                    $warningCount++;
+                } else {
+                    $successCount++;
+                }
+                unset($validRow['_target_id'], $validRow['_has_warning']);
+                Indikator::create($validRow);
+            }
         }
 
         $request->session()->put('import_summary', [
