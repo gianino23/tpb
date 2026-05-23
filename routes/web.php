@@ -12,7 +12,9 @@ use App\Http\Controllers\CapaianController;
 use App\Http\Controllers\CapaianKabupatenController;
 use App\Http\Controllers\WilayahController;
 
-Route::get('/', [AuthController::class,'login'])->name('login');
+Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('portal.publik');
+Route::get('/portal-publik', [\App\Http\Controllers\HomeController::class, 'index'])->name('portal.publik');
+Route::get('/login', [AuthController::class,'login'])->name('login');
 Route::post('/postlogin', [AuthController::class, 'postlogin'])->name('postlogin');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
 

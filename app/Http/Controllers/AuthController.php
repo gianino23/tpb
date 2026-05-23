@@ -33,7 +33,7 @@ class AuthController extends Controller
         if(Auth::attempt($request->only('email','password'))){
             return redirect('/dashboard');
         }else{           
-            return redirect('/')
+            return redirect('/login')
             ->withInput()
             ->withErrors(['login_gagal'=>'Email dan Password Anda Salah']);
         }
@@ -43,6 +43,6 @@ class AuthController extends Controller
     
     public function logout() {
         Auth::logout();
-        return redirect('/');
+        return redirect('/portal-publik');
     }
 }
