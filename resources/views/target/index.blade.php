@@ -2,25 +2,23 @@
 
 @section('content')
 
-<div class="container-xxl flex-grow-1 container-p-y">
-   
-   
-  
-
-    <!-- Responsive Table -->
-    <div class="card">
-      <div class="card-body">
-        <div class="row">
-          <div class="col mb-6">
-            <h4 class=""><span class="text-muted fw-light">Data /</span> Indikator </h4>
-        
-          </div>
-          <div class="col mb-6">
-            <a href="javascript:void(0)" class="btn rounded-pill btn-primary mb-2" id="btn-create-post" style="float:right"><i class="menu-icon tf-icons bx bx-copy"></i>TAMBAH DATA</a>
-     
-          </div>
+<div class="container-xxl flex-grow-1 container-p-y page-shell">
+    <div class="card page-panel">
+      <div class="page-panel-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+        <div class="page-title">
+          <div class="text-muted fw-light">Data / <span class="fw-semibold text-body">Indikator</span></div>
+          <h4 class="mb-0">Daftar Indikator</h4>
+          <div class="text-muted small">Kelola Indikator nasional, satuan, dan statusnya.</div>
         </div>
-       
+        <div class="page-actions">
+          <a href="javascript:void(0)" class="btn btn-outline-success rounded-pill" data-bs-toggle="modal" data-bs-target="#modal-import">
+            <i class="bx bx-upload me-1"></i> Upload Excel
+          </a>
+          <a href="javascript:void(0)" class="btn btn-primary rounded-pill" id="btn-create-post">
+            <i class="bx bx-plus me-1"></i> Tambah Data
+          </a>
+        </div>
+      </div>
       <div class="table-responsive">
         <table id="table" class="table table-striped table-bordered" style="width:100%">
           <thead>
@@ -54,7 +52,7 @@
     </div>
     <!--/ Responsive Table -->
   </div>
-</div>
+
   <!-- / Content -->
 @include('target.modal-create')
 @include('target.modal-edit')

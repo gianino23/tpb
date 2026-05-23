@@ -212,35 +212,34 @@
     @endif
     {{-- ===== END IMPORT EXCEL SECTION ===== --}}
 
-    <div class="card">
-
-        <div class="card-body">
-            <div class="row align-items-center">
-                <div class="col-md-4 mb-3">
-                    <h4 class="mb-0"><span class="text-muted fw-light">Data /</span> Capaian</h4>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <form action="{{ route('capaian_kabupaten.index') }}" method="GET" id="filterForm">
-                        <select name="status" class="form-control" onchange="document.getElementById('filterForm').submit()">
-                            <option value="">-- Filter Semua Status --</option>
-                            <option value="Menunggu Verifikasi" {{ request('status') == 'Menunggu Verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi</option>
-                            <option value="Terverifikasi" {{ request('status') == 'Terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
-                            <option value="Ditolak" {{ request('status') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
-                        </select>
-                    </form>
-                </div>
-                <div class="col-md-4 mb-3 text-end">
-                    @if(auth()->user()->level == 'Operator Kabupaten/Kota')
-                    <button type="button" class="btn rounded-pill btn-primary" data-bs-toggle="modal" data-bs-target="#modalCreate">
-                        <i class="bx bx-plus"></i> AJUKAN CAPAIAN
-                    </button>
-                    @endif
-                    @if(request('status'))
-                        <a href="{{ route('capaian_kabupaten.index') }}" class="btn btn-outline-secondary rounded-pill"><i class="bx bx-reset"></i> Reset Filter</a>
-                    @endif
-                </div>
+    <div class="card page-panel">
+        <div class="page-panel-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+            <div class="page-title">
+                <div class="text-muted fw-light">Data / <span class="fw-semibold text-body">Capaian</span></div>
+                <h4 class="mb-0">Rekap Capaian Kabupaten/Kota</h4>
             </div>
-
+            <div class="page-actions">
+                <form action="{{ route('capaian_kabupaten.index') }}" method="GET" id="filterForm" class="m-0">
+                    <select name="status" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">-- Filter Semua Status --</option>
+                        <option value="Menunggu Verifikasi" {{ request('status') == 'Menunggu Verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi</option>
+                        <option value="Terverifikasi" {{ request('status') == 'Terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
+                        <option value="Ditolak" {{ request('status') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
+                    </select>
+                </form>
+                @if(request('status'))
+                    <a href="{{ route('capaian_kabupaten.index') }}" class="btn btn-outline-secondary rounded-pill">
+                        <i class="bx bx-reset me-1"></i> Reset
+                    </a>
+                @endif
+                @if(auth()->user()->level == 'Operator Kabupaten/Kota')
+                <button type="button" class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#modalCreate">
+                    <i class="bx bx-plus me-1"></i> Ajukan Capaian
+                </button>
+                @endif
+            </div>
+        </div>
+        <div class="card-body pt-0">
             <div class="table-responsive">
                 <table id="table" class="table table-striped table-bordered" style="width:100%">
                     <thead>

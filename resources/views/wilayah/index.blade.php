@@ -2,18 +2,19 @@
 
 @section('content')
 
-<div class="container-xxl flex-grow-1 container-p-y">
-    <div class="card">
-      <div class="card-body">
-        <div class="row">
-          <div class="col mb-6">
-            <h4 class="">Daftar Wilayah</h4>
-          </div>
-          <div class="col mb-6">
-            <a href="{{ route('wilayah.create') }}" class="btn rounded-pill btn-primary mb-2" style="float:right"><i class="menu-icon tf-icons bx bx-copy"></i> TAMBAH DATA</a>
-          </div>
+<div class="container-xxl flex-grow-1 container-p-y page-shell">
+    <div class="card page-panel">
+      <div class="page-panel-header d-flex flex-wrap justify-content-between align-items-start gap-3">
+        <div class="page-title">
+          <div class="text-muted fw-light">Data / <span class="fw-semibold text-body">Wilayah</span></div>
+          <h4 class="mb-0">Daftar Wilayah</h4>
         </div>
-       
+        <div class="page-actions">
+          <a href="{{ route('wilayah.create') }}" class="btn btn-primary rounded-pill">
+            <i class="bx bx-plus me-1"></i> Tambah Data
+          </a>
+        </div>
+      </div>
       <div class="table-responsive">
         <table id="table" class="table table-striped table-bordered" style="width:100%">
           <thead>

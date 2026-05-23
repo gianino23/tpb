@@ -227,6 +227,99 @@
       .layout-page .container-xxl {
         max-width: 100%;
       }
+      .page-shell {
+        padding-top: .25rem;
+      }
+      .page-panel {
+        border: 1px solid #edf0f5;
+        border-radius: 1rem;
+        background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,255,.96));
+        box-shadow: 0 10px 30px rgba(67, 89, 113, .06);
+      }
+      .page-panel .page-panel-header {
+        padding: 1.2rem 1.25rem .9rem;
+      }
+      .page-title {
+        display: flex;
+        flex-direction: column;
+        gap: .15rem;
+      }
+      .page-title .crumb {
+        color: #a1acb8;
+        font-size: .9rem;
+      }
+      .page-title .main {
+        color: #566a7f;
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+      .page-title .sub {
+        color: #a1acb8;
+        font-size: .85rem;
+      }
+      .page-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: .65rem;
+      }
+      .page-actions select,
+      .page-actions .form-control {
+        min-width: 220px;
+        min-height: 42px;
+        border-radius: .8rem;
+        border-color: #dfe3ee;
+        box-shadow: none;
+      }
+      .page-actions select:focus,
+      .page-actions .form-control:focus {
+        border-color: rgba(105,108,255,.8);
+        box-shadow: 0 0 0 .15rem rgba(105,108,255,.12);
+      }
+      .page-actions .btn {
+        border-radius: 999px;
+        box-shadow: 0 10px 20px rgba(105,108,255,.18);
+      }
+      .page-search-row {
+        padding: 0 1.25rem 1rem;
+      }
+      .page-search-row .form-control,
+      .page-search-row select {
+        border-radius: .8rem;
+        min-height: 42px;
+        border-color: #dfe3ee;
+      }
+      .page-search-row .form-control:focus,
+      .page-search-row select:focus {
+        border-color: rgba(105,108,255,.8);
+        box-shadow: 0 0 0 .15rem rgba(105,108,255,.12);
+      }
+      .page-panel .table-responsive {
+        padding: 0 1.25rem 1.25rem;
+      }
+      .page-panel .dataTables_wrapper .dataTables_filter {
+        float: none;
+        text-align: right;
+        margin: 0 0 1rem;
+      }
+      .page-panel .dataTables_wrapper .dataTables_filter label {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+        margin: 0;
+      }
+      .page-panel .dataTables_wrapper .dataTables_filter input {
+        width: min(100%, 38rem);
+        border-radius: .8rem;
+        border: 1px solid #dfe3ee;
+        padding: .55rem .9rem;
+        box-shadow: none;
+      }
+      .page-panel .dataTables_wrapper .dataTables_filter input:focus {
+        border-color: rgba(105,108,255,.8);
+        box-shadow: 0 0 0 .15rem rgba(105,108,255,.12);
+      }
       .content-wrapper > .container-xxl {
         padding-top: 1rem !important;
       }
@@ -347,6 +440,31 @@
         }
         .app-footer .footer-panel {
           border-radius: .85rem;
+        }
+        .page-panel {
+          border-radius: .9rem;
+        }
+        .page-panel .page-panel-header {
+          padding: 1rem 1rem .75rem;
+        }
+        .page-search-row {
+          padding: 0 1rem .9rem;
+        }
+        .page-panel .table-responsive {
+          padding: 0 1rem 1rem;
+        }
+        .page-panel .dataTables_wrapper .dataTables_filter label {
+          justify-content: stretch;
+        }
+        .page-panel .dataTables_wrapper .dataTables_filter input {
+          width: 100%;
+        }
+        .page-actions {
+          justify-content: flex-start;
+        }
+        .page-actions select,
+        .page-actions .form-control {
+          min-width: 100%;
         }
         .app-shell-brand {
           min-height: 100px;
