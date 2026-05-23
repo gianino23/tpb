@@ -175,6 +175,62 @@
         padding-left: 1.5rem;
         padding-right: 1.5rem;
       }
+      .app-footer {
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+      }
+      .app-footer .footer-panel {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid #edf0f5;
+        border-radius: 1rem;
+        background:
+          linear-gradient(135deg, rgba(105,108,255,.06), rgba(255,255,255,.92) 42%, rgba(17,24,39,.03)),
+          #fff;
+        box-shadow: 0 10px 30px rgba(67, 89, 113, .08);
+      }
+      .app-footer .footer-panel:before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, rgba(105,108,255,.08), transparent 35%),
+          linear-gradient(180deg, transparent, rgba(17,24,39,.03));
+        pointer-events: none;
+      }
+      .app-footer .footer-content {
+        position: relative;
+        z-index: 1;
+      }
+      .app-footer .footer-brand {
+        display: flex;
+        align-items: center;
+        gap: .85rem;
+      }
+      .app-footer .footer-badge {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #eef2ff;
+        color: #696cff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 0 auto;
+      }
+      .app-footer .footer-title {
+        color: #566a7f;
+        font-weight: 700;
+        line-height: 1.25;
+      }
+      .app-footer .footer-subtitle {
+        color: #a1acb8;
+        font-size: .85rem;
+      }
+      .app-footer .footer-meta {
+        color: #a1acb8;
+        font-size: .85rem;
+      }
       @media (max-width: 1199.98px) {
         .layout-page {
           padding-left: .75rem;
@@ -223,6 +279,12 @@
           padding-left: .75rem;
           padding-right: .75rem;
           font-size: .8rem;
+        }
+        .app-footer .footer-brand {
+          align-items: flex-start;
+        }
+        .app-footer .footer-panel {
+          border-radius: .85rem;
         }
       }
     </style>
@@ -841,18 +903,29 @@
             @yield('content')
 
             <!-- Footer -->
-            <footer class="content-footer footer bg-footer-theme">
-              <div class="container-xxl d-flex flex-wrap justify-content-between py-2 flex-md-row flex-column">
-                <div class="mb-2 mb-md-0">
-                  ©
-                  <script>
-                    document.write(new Date().getFullYear());
-                  </script>
-                  , E-TPB | Sistem Informasi Pemantauan dan Evaluasi Capaian Indikator Tujuan Pembangunan Berkelanjutan <br/>Dalam Pelaksanaan Pembangunan Jangka Menengah Kalimantan Selatan Tahun 2025-2030
-                  
-                </div>
-                <div>
-                  
+            <footer class="content-footer footer bg-transparent app-footer">
+              <div class="container-xxl">
+                <div class="footer-panel">
+                  <div class="footer-content px-4 py-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div class="footer-brand">
+                      <div class="footer-badge">
+                        <i class="bx bx-planet fs-4"></i>
+                      </div>
+                      <div>
+                        <div class="footer-title">
+                          E-TPB
+                          <span class="footer-subtitle d-block">Sistem Pemantauan dan Evaluasi Capaian Indikator TPB</span>
+                        </div>
+                        <div class="footer-meta">
+                          Kalimantan Selatan · Tahun {{ date('Y') }}
+                        </div>
+                      </div>
+                    </div>
+                    <div class="text-md-end">
+                      <div class="footer-title">Dalam Pelaksanaan Pembangunan Jangka Menengah</div>
+                      <div class="footer-meta">Provinsi Kalimantan Selatan 2025-2030</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </footer>
