@@ -51,6 +51,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/capaian_kabupaten/download-template', [CapaianKabupatenController::class, 'downloadTemplate'])->name('capaian_kabupaten.download-template');
     Route::post('/capaian_kabupaten/import-excel', [CapaianKabupatenController::class, 'importExcel'])->name('capaian_kabupaten.import-excel');
+    Route::post('/capaian_kabupaten/bulk-action', [CapaianKabupatenController::class, 'bulkAction'])->name('capaian_kabupaten.bulk-action');
     Route::resource('capaian_kabupaten', CapaianKabupatenController::class);
     Route::post('/capaian_kabupaten/verify/{id}', [CapaianKabupatenController::class, 'verify'])->name('capaian_kabupaten.verify');
     Route::post('/capaian_kabupaten/reject/{id}', [CapaianKabupatenController::class, 'reject'])->name('capaian_kabupaten.reject');

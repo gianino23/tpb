@@ -35,11 +35,34 @@ class CapaianKabupatenController extends Controller
             $query->where('user_id', $user->id);
         }
 
-        // Stats for cards (before filtering)
+        // Apply wilayah filter if exists (using flexible partial matching)
+        if ($request->wilayah) {
+            $cleanReq = str_replace(['Kabupaten ', 'Kab. ', 'Kota ', 'kabupaten ', 'kota '], '', $request->wilayah);
+            $query->where('wilayah', 'LIKE', '%' . $cleanReq . '%');
+        }
+
+        // Stats for cards (before status filtering)
         $statsQuery = clone $query;
         $countMenunggu = (clone $statsQuery)->where('status', 'Menunggu Verifikasi')->count();
         $countTerverifikasi = (clone $statsQuery)->where('status', 'Terverifikasi')->count();
         $countDitolak = (clone $statsQuery)->where('status', 'Ditolak')->count();
+
+        // Per-wilayah recap (only for Admin/Provinsi level)
+        $rekapWilayah = [];
+        if ($user->level != 'Operator Kabupaten/Kota') {
+            $allCapaian = (clone $statsQuery)->get(['wilayah', 'status']);
+            $grouped = $allCapaian->groupBy('wilayah');
+            foreach ($grouped as $wil => $items) {
+                $rekapWilayah[] = [
+                    'wilayah'       => $wil ?: '-',
+                    'menunggu'      => $items->where('status', 'Menunggu Verifikasi')->count(),
+                    'terverifikasi' => $items->where('status', 'Terverifikasi')->count(),
+                    'ditolak'       => $items->where('status', 'Ditolak')->count(),
+                    'total'         => $items->count(),
+                ];
+            }
+            usort($rekapWilayah, fn($a, $b) => strcmp($a['wilayah'], $b['wilayah']));
+        }
 
         // Apply filter if exists
         if ($request->status) {
@@ -66,9 +89,11 @@ class CapaianKabupatenController extends Controller
             $rpjmds = Rpjmd::all();
         }
 
+        $wilayahList = \App\Models\Wilayah::all();
+
         return view('capaian_kabupaten.index', compact(
             'capaians', 'tpbs', 'targets', 'indikators', 'rpjmds',
-            'countMenunggu', 'countTerverifikasi', 'countDitolak'
+            'countMenunggu', 'countTerverifikasi', 'countDitolak', 'wilayahList', 'rekapWilayah'
         ));
     }
 
@@ -130,9 +155,14 @@ class CapaianKabupatenController extends Controller
             'files' => json_encode($filePaths),
         ]);
 
-        // Send Email Notification
+        // Send Email Notification to both Kabupaten Operator and Province Operators
         try {
-            Mail::to($user->email)->send(new CapaianNotification($capaian));
+            $recipients = [$user->email];
+            $provinsiEmails = \App\Models\User::where('level', 'Operator Provinsi')->pluck('email')->toArray();
+            if (!empty($provinsiEmails)) {
+                $recipients = array_merge($recipients, $provinsiEmails);
+            }
+            Mail::to($recipients)->send(new CapaianNotification($capaian));
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Mail Error: ' . $e->getMessage());
         }
@@ -672,5 +702,52 @@ class CapaianKabupatenController extends Controller
         }
 
         return null;
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $action = $request->input('action');
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return redirect()->back()->with('error', 'Pilih data terlebih dahulu.');
+        }
+
+        if ($action === 'verify') {
+            CapaianKabupaten::whereIn('id', $ids)
+                ->where('status', 'Menunggu Verifikasi')
+                ->update([
+                    'status' => 'Terverifikasi',
+                    'tanggal_terima' => \Carbon\Carbon::now(),
+                    'keterangan_verifikasi' => $request->input('keterangan_verifikasi') ?: 'Diverifikasi secara massal'
+                ]);
+            return redirect()->back()->with('success', 'Data capaian terpilih berhasil diverifikasi.');
+        }
+
+        if ($action === 'reject') {
+            CapaianKabupaten::whereIn('id', $ids)
+                ->where('status', 'Menunggu Verifikasi')
+                ->update([
+                    'status' => 'Ditolak',
+                    'keterangan_verifikasi' => $request->input('keterangan_verifikasi') ?: 'Ditolak secara massal'
+                ]);
+            return redirect()->back()->with('success', 'Data capaian terpilih berhasil ditolak.');
+        }
+
+        if ($action === 'delete') {
+            $capaians = CapaianKabupaten::whereIn('id', $ids)->get();
+            foreach ($capaians as $capaian) {
+                $files = json_decode($capaian->files, true);
+                if ($files) {
+                    foreach ($files as $file) {
+                        \Illuminate\Support\Facades\Storage::delete('public/capaian_dokumen/' . $file);
+                    }
+                }
+                $capaian->delete();
+            }
+            return redirect()->back()->with('success', 'Data capaian terpilih berhasil dihapus.');
+        }
+
+        return redirect()->back()->with('error', 'Aksi tidak valid.');
     }
 }

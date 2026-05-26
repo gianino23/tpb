@@ -1,6 +1,49 @@
 @extends('layouts.admin')
 
 @section('content')
+<style>
+    .region-tabs {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 4px 4px 10px 4px;
+        gap: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .region-tabs::-webkit-scrollbar {
+        height: 6px;
+    }
+    .region-tabs::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 4px;
+    }
+    .region-tab-item {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        padding: 8px 24px;
+        border-radius: 20px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-block;
+    }
+    .region-tab-item:hover {
+        background: #f8fafc;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+    .region-tab-item.active {
+        background: #fff;
+        color: #1e293b;
+        border-color: #64748b;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        font-weight: 600;
+    }
+    .dataTables_filter {
+        display: none !important;
+    }
+</style>
 
 <div class="container-xxl flex-grow-1 container-p-y">
     <!-- Summary Cards -->
@@ -49,8 +92,124 @@
         </div>
     </div>
 
+    {{-- ===== REKAP PER KABUPATEN (Admin/Provinsi only) ===== --}}
+    @if(auth()->user()->level != 'Operator Kabupaten/Kota')
+    @isset($rekapWilayah)
+    @if(count($rekapWilayah) > 0)
+    <div class="card mb-4" style="border-top: 4px solid #6366f1;">
+        <div class="card-header py-3" style="background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bx bx-bar-chart-alt-2 text-white" style="font-size:1.4rem"></i>
+                    <div>
+                        <h5 class="mb-0 text-white fw-bold">Rekap Capaian per Kabupaten/Kota</h5>
+                        <small class="text-white opacity-75">Ringkasan status pengajuan dari seluruh wilayah</small>
+                    </div>
+                </div>
+                <span class="badge bg-white text-dark fw-semibold">{{ count($rekapWilayah) }} Wilayah</span>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0" style="font-size: 0.9rem;">
+                    <thead style="background: #f8fafc;">
+                        <tr class="text-nowrap">
+                            <th class="ps-4 py-3 text-muted fw-semibold" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em;">#</th>
+                            <th class="py-3 text-muted fw-semibold" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em;">Kabupaten / Kota</th>
+                            <th class="py-3 text-center text-muted fw-semibold" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em;">Total</th>
+                            <th class="py-3 text-center" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em;color:#d97706;">Menunggu</th>
+                            <th class="py-3 text-center" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em;color:#059669;">Terverifikasi</th>
+                            <th class="py-3 text-center" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em;color:#dc2626;">Ditolak</th>
+                            <th class="py-3 text-center text-muted fw-semibold" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em;">Progress</th>
+                            <th class="py-3 text-center text-muted fw-semibold pe-4" style="font-size:0.78rem;text-transform:uppercase;letter-spacing:.05em;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($rekapWilayah as $i => $rek)
+                        @php
+                            $pct = $rek['total'] > 0 ? round(($rek['terverifikasi'] / $rek['total']) * 100) : 0;
+                            $barColor = $pct >= 75 ? '#059669' : ($pct >= 40 ? '#d97706' : '#dc2626');
+                        @endphp
+                        <tr style="border-bottom: 1px solid #f1f5f9;">
+                            <td class="ps-4 py-3 text-muted">{{ $i + 1 }}</td>
+                            <td class="py-3 fw-semibold">
+                                <i class="bx bx-map-pin me-1" style="color:#6366f1;"></i>
+                                {{ $rek['wilayah'] }}
+                            </td>
+                            <td class="py-3 text-center">
+                                <span class="badge rounded-pill bg-secondary">{{ $rek['total'] }}</span>
+                            </td>
+                            <td class="py-3 text-center">
+                                @if($rek['menunggu'] > 0)
+                                <a href="{{ route('capaian_kabupaten.index', ['wilayah' => $rek['wilayah'], 'status' => 'Menunggu Verifikasi']) }}"
+                                   class="badge rounded-pill text-decoration-none" style="background:#FEF3C7;color:#92400E;border:1px solid #FCD34D;">
+                                    {{ $rek['menunggu'] }}
+                                </a>
+                                @else
+                                <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            <td class="py-3 text-center">
+                                @if($rek['terverifikasi'] > 0)
+                                <a href="{{ route('capaian_kabupaten.index', ['wilayah' => $rek['wilayah'], 'status' => 'Terverifikasi']) }}"
+                                   class="badge rounded-pill text-decoration-none" style="background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;">
+                                    {{ $rek['terverifikasi'] }}
+                                </a>
+                                @else
+                                <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            <td class="py-3 text-center">
+                                @if($rek['ditolak'] > 0)
+                                <a href="{{ route('capaian_kabupaten.index', ['wilayah' => $rek['wilayah'], 'status' => 'Ditolak']) }}"
+                                   class="badge rounded-pill text-decoration-none" style="background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;">
+                                    {{ $rek['ditolak'] }}
+                                </a>
+                                @else
+                                <span class="text-muted">—</span>
+                                @endif
+                            </td>
+                            <td class="py-3 text-center" style="min-width:110px;">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="flex-grow-1 rounded" style="height:6px;background:#e2e8f0;overflow:hidden;">
+                                        <div style="width:{{ $pct }}%;height:6px;background:{{ $barColor }};border-radius:4px;transition:width .4s;"></div>
+                                    </div>
+                                    <small class="fw-semibold" style="color:{{ $barColor }};min-width:36px;">{{ $pct }}%</small>
+                                </div>
+                            </td>
+                            <td class="py-3 text-center pe-4">
+                                <a href="{{ route('capaian_kabupaten.index', ['wilayah' => $rek['wilayah']]) }}"
+                                   class="btn btn-sm btn-outline-primary rounded-pill px-3" style="font-size:0.78rem;">
+                                    <i class="bx bx-filter-alt me-1"></i>Filter
+                                </a>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                    <tfoot style="background:#f8fafc;border-top:2px solid #e2e8f0;">
+                        <tr>
+                            <td colspan="2" class="ps-4 py-2 fw-bold text-dark">Total Keseluruhan</td>
+                            <td class="py-2 text-center fw-bold">
+                                <span class="badge rounded-pill bg-dark">{{ array_sum(array_column($rekapWilayah, 'total')) }}</span>
+                            </td>
+                            <td class="py-2 text-center fw-bold" style="color:#92400E;">{{ array_sum(array_column($rekapWilayah, 'menunggu')) }}</td>
+                            <td class="py-2 text-center fw-bold" style="color:#065F46;">{{ array_sum(array_column($rekapWilayah, 'terverifikasi')) }}</td>
+                            <td class="py-2 text-center fw-bold" style="color:#991B1B;">{{ array_sum(array_column($rekapWilayah, 'ditolak')) }}</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    @endif
+    @endisset
+    @endif
+    {{-- ===== END REKAP PER KABUPATEN ===== --}}
+
     {{-- ===== IMPORT EXCEL SECTION (Operator Kabupaten/Kota only) ===== --}}
     @if(auth()->user()->level == 'Operator Kabupaten/Kota')
+
     <div class="card mb-4" style="border-top: 4px solid #1D4ED8;">
         <div class="card-header py-3" style="background: linear-gradient(135deg, #1B2A4A 0%, #1D4ED8 100%);">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
@@ -213,37 +372,99 @@
     {{-- ===== END IMPORT EXCEL SECTION ===== --}}
 
     <div class="card page-panel">
-        <div class="page-panel-header d-flex flex-wrap justify-content-between align-items-start gap-3">
-            <div class="page-title">
-                <div class="text-muted fw-light">Data / <span class="fw-semibold text-body">Capaian</span></div>
-                <h4 class="mb-0">Rekap Capaian Kabupaten/Kota</h4>
-            </div>
-            <div class="page-actions">
-                <form action="{{ route('capaian_kabupaten.index') }}" method="GET" id="filterForm" class="m-0">
-                    <select name="status" class="form-select" onchange="document.getElementById('filterForm').submit()">
-                        <option value="">-- Filter Semua Status --</option>
-                        <option value="Menunggu Verifikasi" {{ request('status') == 'Menunggu Verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi</option>
-                        <option value="Terverifikasi" {{ request('status') == 'Terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
-                        <option value="Ditolak" {{ request('status') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
-                    </select>
-                </form>
-                @if(request('status'))
-                    <a href="{{ route('capaian_kabupaten.index') }}" class="btn btn-outline-secondary rounded-pill">
-                        <i class="bx bx-reset me-1"></i> Reset
-                    </a>
-                @endif
+        <div class="card-body py-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <div>
+                    <div class="text-muted small fw-light">Data / <span class="fw-semibold text-body">Capaian</span></div>
+                    <h4 class="mb-0 fw-bold">Rekap capaian kabupaten/kota</h4>
+                </div>
                 @if(auth()->user()->level == 'Operator Kabupaten/Kota')
-                <button type="button" class="btn btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#modalCreate">
+                <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#modalCreate">
                     <i class="bx bx-plus me-1"></i> Ajukan Capaian
                 </button>
                 @endif
             </div>
-        </div>
-        <div class="card-body pt-0">
+
+            {{-- Region Filter Pills --}}
+            @if(auth()->user()->level != 'Operator Kabupaten/Kota')
+            <div class="region-tabs-container mb-4">
+                <div class="region-tabs">
+                    <a href="{{ route('capaian_kabupaten.index', ['status' => request('status')]) }}" 
+                       class="region-tab-item {{ !request('wilayah') ? 'active' : '' }}">Semua</a>
+                    @isset($wilayahList)
+                    @foreach($wilayahList as $w)
+                        <a href="{{ route('capaian_kabupaten.index', ['wilayah' => $w->nama_wilayah, 'status' => request('status')]) }}" 
+                           class="region-tab-item {{ request('wilayah') == $w->nama_wilayah ? 'active' : '' }}">{{ $w->nama_wilayah }}</a>
+                    @endforeach
+                    @endisset
+                </div>
+            </div>
+            @endif
+
+            {{-- Search & Status Filter Form --}}
+            <form action="{{ route('capaian_kabupaten.index') }}" method="GET" id="filterForm" class="mb-4">
+                @if(request('wilayah'))
+                    <input type="hidden" name="wilayah" value="{{ request('wilayah') }}">
+                @endif
+                
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-6">
+                        <div class="input-group input-group-merge">
+                            <span class="input-group-text"><i class="bx bx-search fs-4"></i></span>
+                            <input type="text" id="customSearchInput" class="form-control form-control-lg" placeholder="Pencarian..." style="border-radius: 8px;">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <select name="status" class="form-select form-select-lg" onchange="document.getElementById('filterForm').submit()" style="border-radius: 8px;">
+                            <option value="">-- Filter Semua Status --</option>
+                            <option value="Menunggu Verifikasi" {{ request('status') == 'Menunggu Verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi</option>
+                            <option value="Terverifikasi" {{ request('status') == 'Terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
+                            <option value="Ditolak" {{ request('status') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-3 mt-3">
+                    <a href="{{ route('capaian_kabupaten.index') }}" class="btn btn-outline-secondary px-4" style="border-radius: 8px;">
+                        <i class="bx bx-reset me-1"></i> Reset
+                    </a>
+                    <span class="text-muted small">Menampilkan {{ $capaians->count() }} data</span>
+                </div>
+            </form>
+
+            {{-- Floating Bulk Actions Panel --}}
+            <div id="bulkActionPanel" class="card mb-4 border-primary" style="display: none; border: 1px dashed #3b82f6; background-color: #eff6ff; border-radius: 8px;">
+                <div class="card-body py-3 d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bx bx-check-square text-primary" style="font-size: 1.5rem;"></i>
+                        <div>
+                            <strong class="text-primary"><span id="selectedCount">0</span> Item Terpilih</strong>
+                            <div class="small text-muted">Aksi massal akan diterapkan ke seluruh item yang Anda centang.</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        @if(auth()->user()->level == 'Administrator' || auth()->user()->level == 'Operator Provinsi')
+                        <button type="button" class="btn btn-success btn-sm px-3 rounded-pill" id="bulkVerifyBtn">
+                            <i class="bx bx-check-shield me-1"></i> Verifikasi Massal
+                        </button>
+                        <button type="button" class="btn btn-warning btn-sm px-3 rounded-pill" id="bulkRejectBtn">
+                            <i class="bx bx-x-circle me-1"></i> Tolak Massal
+                        </button>
+                        @endif
+                        <button type="button" class="btn btn-danger btn-sm px-3 rounded-pill" id="bulkDeleteBtn">
+                            <i class="bx bx-trash me-1"></i> Hapus Massal
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div class="table-responsive">
                 <table id="table" class="table table-striped table-bordered" style="width:100%">
                     <thead>
                         <tr class="text-nowrap">
+                            <th class="text-center" style="width: 40px;">
+                                <input type="checkbox" id="checkAll" class="form-check-input">
+                            </th>
                             <th>No Tiket</th>
                             <th>Wilayah</th>
                             <th>OPD</th>
@@ -260,6 +481,9 @@
                     <tbody>
                         @foreach($capaians as $data)
                         <tr>
+                            <td class="text-center">
+                                <input type="checkbox" name="ids[]" value="{{ $data->id }}" class="form-check-input sub_chk" data-status="{{ $data->status }}">
+                            </td>
                             <td><code>{{ $data->no_tiket }}</code></td>
                             <td>{{ $data->wilayah }}</td>
                             <td>{{ $data->opd }}</td>
@@ -634,6 +858,48 @@
     </div>
 </div>
 
+<!-- Modal Bulk Review -->
+<div class="modal fade" id="modalBulkReview" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <form id="bulkActionForm" action="{{ route('capaian_kabupaten.bulk-action') }}" method="POST">
+            @csrf
+            <input type="hidden" name="action" id="bulkActionValue">
+            <div id="bulkSelectedIdsContainer"></div>
+
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulkModalTitle">Konfirmasi Aksi Massal</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="bulkVerifyBody" style="display: none;">
+                        <p>Apakah Anda yakin ingin memverifikasi <strong class="text-success"><span class="bulk-count-label">0</span> data capaian</strong> terpilih?</p>
+                        <div class="mb-3">
+                            <label class="form-label">Keterangan Verifikasi (Opsional)</label>
+                            <textarea name="keterangan_verifikasi" class="form-control" rows="3" placeholder="Masukkan catatan tambahan..."></textarea>
+                        </div>
+                    </div>
+                    <div id="bulkRejectBody" style="display: none;">
+                        <p>Apakah Anda yakin ingin menolak <strong class="text-danger"><span class="bulk-count-label">0</span> data capaian</strong> terpilih?</p>
+                        <div class="mb-3">
+                            <label class="form-label">Alasan Penolakan (Wajib)</label>
+                            <textarea name="keterangan_verifikasi" id="bulkRejectReason" class="form-control" rows="3" placeholder="Masukkan alasan penolakan..." required></textarea>
+                        </div>
+                    </div>
+                    <div id="bulkDeleteBody" style="display: none;">
+                        <p class="text-danger fw-bold"><i class="bx bx-error-circle"></i> PERINGATAN: Tindakan ini tidak dapat dibatalkan!</p>
+                        <p>Apakah Anda yakin ingin menghapus secara permanen <strong class="text-danger"><span class="bulk-count-label">0</span> data capaian</strong> terpilih?</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn" id="bulkSubmitBtn">Lanjutkan</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 @endsection
 
 @section('js')
@@ -836,6 +1102,93 @@
         const detailId = urlParams.get('detail');
         if (detailId) {
             $('.btn-detail[data-id="' + detailId + '"]').first().trigger('click');
+        }
+
+        // Custom Search Input binding to DataTable
+        var dt = $('#table').DataTable();
+        $('#customSearchInput').on('keyup', function() {
+            dt.search(this.value).draw();
+        });
+
+        // Checkbox "Select All"
+        $('#checkAll').on('click', function() {
+            $('.sub_chk').prop('checked', this.checked);
+            updateBulkActionPanel();
+        });
+
+        $('.sub_chk').on('click', function() {
+            if ($('.sub_chk:checked').length === $('.sub_chk').length) {
+                $('#checkAll').prop('checked', true);
+            } else {
+                $('#checkAll').prop('checked', false);
+            }
+            updateBulkActionPanel();
+        });
+
+        function updateBulkActionPanel() {
+            var selectedCount = $('.sub_chk:checked').length;
+            if (selectedCount > 0) {
+                $('#selectedCount').text(selectedCount);
+                $('#bulkActionPanel').slideDown(200);
+            } else {
+                $('#bulkActionPanel').slideUp(200);
+            }
+        }
+
+        // Bulk Verify
+        $('#bulkVerifyBtn').on('click', function() {
+            showBulkModal('verify', 'Verifikasi Massal');
+        });
+
+        // Bulk Reject
+        $('#bulkRejectBtn').on('click', function() {
+            showBulkModal('reject', 'Tolak Massal');
+        });
+
+        // Bulk Delete
+        $('#bulkDeleteBtn').on('click', function() {
+            showBulkModal('delete', 'Hapus Massal');
+        });
+
+        function showBulkModal(action, title) {
+            var selectedIds = [];
+            $('.sub_chk:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+
+            $('#bulkActionValue').val(action);
+            $('.bulk-count-label').text(selectedIds.length);
+            $('#bulkModalTitle').text(title);
+
+            // Populate hidden inputs
+            var container = $('#bulkSelectedIdsContainer');
+            container.empty();
+            selectedIds.forEach(function(id) {
+                container.append(`<input type="hidden" name="ids[]" value="${id}">`);
+            });
+
+            // Toggle body visibility
+            $('#bulkVerifyBody').hide();
+            $('#bulkRejectBody').hide();
+            $('#bulkDeleteBody').hide();
+
+            $('#bulkSubmitBtn').removeClass('btn-success btn-warning btn-danger');
+
+            if (action === 'verify') {
+                $('#bulkVerifyBody').show();
+                $('#bulkSubmitBtn').addClass('btn-success').text('Verifikasi & Terima');
+                $('#bulkRejectReason').prop('required', false);
+            } else if (action === 'reject') {
+                $('#bulkRejectBody').show();
+                $('#bulkSubmitBtn').addClass('btn-warning').text('Tolak Terpilih');
+                $('#bulkRejectReason').prop('required', true).val('');
+            } else if (action === 'delete') {
+                $('#bulkDeleteBody').show();
+                $('#bulkSubmitBtn').addClass('btn-danger').text('Hapus Terpilih');
+                $('#bulkRejectReason').prop('required', false);
+            }
+
+            $('#modalBulkReview').modal('show');
         }
     });
 </script>

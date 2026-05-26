@@ -18,9 +18,11 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 
 class RpjmdController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
+        $query = Rpjmd::with('indikator');
+
         if ($user->level == 'Operator Kabupaten/Kota') {
             $userWilayah = '';
             if (str_contains(strtolower($user->wilayah), 'barito kuala')) {
@@ -30,16 +32,23 @@ class RpjmdController extends Controller
             } elseif (str_contains(strtolower($user->wilayah), 'tapin')) {
                 $userWilayah = 'Tapin';
             }
-            $rpjmds = Rpjmd::with('indikator')->where('wilayah', $userWilayah)->get();
+            $query->where('wilayah', $userWilayah);
         } else {
-            $rpjmds = Rpjmd::with('indikator')->get();
+            if ($request->wilayah) {
+                $cleanReq = str_replace(['Kabupaten ', 'Kab. ', 'Kota ', 'kabupaten ', 'kota '], '', $request->wilayah);
+                $query->where('wilayah', 'LIKE', '%' . $cleanReq . '%');
+            }
         }
+
+        $rpjmds = $query->get();
 
         // Ambil semua data indikator untuk dropdown relasi RPJMD
         $indikators = Indikator::orderByRaw("LENGTH(no_indikator) ASC, no_indikator ASC")->get();
+        
+        $wilayahList = \App\Models\Wilayah::all();
 
         //return view with data
-        return view('rpjmd.index', compact('rpjmds', 'indikators'));
+        return view('rpjmd.index', compact('rpjmds', 'indikators', 'wilayahList'));
     }
 
     public function list($id)
