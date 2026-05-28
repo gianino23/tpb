@@ -8,467 +8,738 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('sneat/assets/vendor/fonts/boxicons.css') }}" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     * { box-sizing: border-box; }
-    html, body { margin: 0; }
+    html, body { margin: 0; padding: 0; }
     body {
       font-family: 'Public Sans', sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(105,108,255,.12), transparent 30%),
-        radial-gradient(circle at top right, rgba(41,181,246,.12), transparent 26%),
-        linear-gradient(180deg, #f7f8ff 0%, #eef2ff 100%);
-      color: #182230;
+      background: #f8f9fa;
+      color: #2b303a;
       overflow-x: hidden;
+      padding: 40px 20px;
     }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(18px); }
-      to { opacity: 1; transform: translateY(0); }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
     }
-    @keyframes softFloat {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-6px); }
-    }
-    @keyframes glowPulse {
-      0%, 100% { box-shadow: 0 12px 30px rgba(67, 89, 113, .06); }
-      50% { box-shadow: 0 16px 38px rgba(91, 99, 255, .14); }
-    }
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-    .wrap { max-width: 1240px; margin: 0 auto; padding: 24px 18px 40px; }
-    .topbar {
-      display: flex; align-items: center; justify-content: space-between; gap: 14px;
-      margin-bottom: 18px;
-    }
-    .brand {
-      display: flex; align-items: center; gap: 14px;
-      background: rgba(255,255,255,.82);
-      border: 1px solid #edf0f5;
-      border-radius: 20px;
-      padding: 14px 18px;
-      box-shadow: 0 12px 30px rgba(67, 89, 113, .06);
-      min-width: 0;
-      animation: fadeUp .6s ease both;
-    }
-    .brand-badge{
-      width: 46px; height: 46px; border-radius: 14px;
-      display:flex; align-items:center; justify-content:center;
-      background: linear-gradient(135deg, rgba(105,108,255,.18), rgba(41,181,246,.16));
-      color:#5b63ff; font-size: 1.2rem; flex: 0 0 auto;
-    }
-    .brand h2, .brand p { margin: 0; }
-    .brand h2 { font-size: 1rem; line-height: 1.2; }
-    .brand p { color: #7c8da5; font-size: .88rem; }
-    .pill {
-      display:inline-flex; align-items:center; gap:.45rem;
-      background:#fff; border:1px solid #e7ebf3; border-radius:999px;
-      padding:.55rem .85rem; color:#5a6880; font-weight:700; font-size:.9rem;
-      box-shadow: 0 10px 22px rgba(67, 89, 113, .05);
-      white-space: nowrap;
-      animation: fadeUp .75s ease both;
-    }
-    .hero {
-      background: linear-gradient(135deg, rgba(105,108,255,.14), rgba(255,255,255,.96) 45%, rgba(41,181,246,.08));
-      border: 1px solid #e8ebf5;
-      border-radius: 26px;
-      box-shadow: 0 16px 42px rgba(67, 89, 113, .08);
-      padding: 28px;
-      display: grid;
-      grid-template-columns: 1.25fr .95fr;
-      gap: 22px;
-      align-items: center;
-      position: relative;
-      overflow: hidden;
-      animation: fadeUp .75s ease both;
-    }
-    .hero::before,
-    .hero::after {
-      content: "";
-      position: absolute;
-      inset: auto;
-      border-radius: 999px;
-      pointer-events: none;
-      filter: blur(2px);
-      opacity: .9;
-    }
-    .hero::before {
-      width: 160px;
-      height: 160px;
-      top: -40px;
-      right: -36px;
-      background: radial-gradient(circle, rgba(105,108,255,.16), transparent 68%);
-      animation: softFloat 8s ease-in-out infinite;
-    }
-    .hero::after {
-      width: 120px;
-      height: 120px;
-      left: -24px;
-      bottom: -28px;
-      background: radial-gradient(circle, rgba(41,181,246,.12), transparent 68%);
-      animation: softFloat 10s ease-in-out infinite reverse;
-    }
-    .eyebrow {
-      color: #6670ff; font-weight: 800; font-size: .78rem; letter-spacing: .12em;
-      text-transform: uppercase; margin-bottom: 10px;
-      animation: fadeUp .65s ease both;
-    }
-    h1 {
-      margin: 0 0 12px;
-      font-size: clamp(2rem, 3.2vw, 3.4rem);
-      line-height: 1.03;
-      letter-spacing: 0;
-      max-width: 14ch;
-      animation: fadeUp .8s ease both;
-    }
-    .lead {
-      margin: 0;
-      color: #51647b;
-      font-size: 1.05rem;
-      line-height: 1.7;
-      max-width: 760px;
-      animation: fadeUp .95s ease both;
-    }
-    .hero-side {
-      background: rgba(255,255,255,.76);
-      border: 1px solid #edf0f5;
-      border-radius: 22px;
-      padding: 18px;
-      backdrop-filter: blur(12px);
-      animation: glowPulse 4.5s ease-in-out infinite, fadeUp .85s ease both;
-    }
-    .hero-side h3 { margin: 0 0 14px; font-size: 1rem; }
-    .kpis { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
-    .kpi {
-      background: #fff;
-      border: 1px solid #edf0f5;
-      border-radius: 18px;
-      padding: 16px;
-      box-shadow: 0 10px 24px rgba(67, 89, 113, .05);
-      animation: fadeUp .85s ease both;
-    }
-    .kpi .label { color: #7c8da5; font-size: .84rem; margin-bottom: 6px; }
-    .kpi .value { font-size: 1.8rem; font-weight: 800; color: #182230; line-height: 1; }
-    .kpi .hint { margin-top: 8px; color: #6e7f95; font-size: .84rem; }
-    .section { margin-top: 22px; }
-    .section-head {
-      display:flex; justify-content:space-between; align-items:flex-end; gap:12px; flex-wrap:wrap;
-      margin-bottom: 12px;
-    }
-    .section-head h2 { margin: 0; font-size: 1.2rem; }
-    .section-head span { color:#7c8da5; font-size:.92rem; }
-    .summary-grid {
-      display:grid;
-      grid-template-columns: repeat(4, minmax(0,1fr));
-      gap: 14px;
-    }
-    .summary {
-      background: #fff;
-      border: 1px solid #edf0f5;
-      border-radius: 20px;
-      padding: 18px;
-      box-shadow: 0 12px 28px rgba(67, 89, 113, .06);
-      animation: fadeUp .75s ease both;
-    }
-    .summary .label { color:#7c8da5; font-size:.88rem; }
-    .summary .value { margin-top: 8px; font-size: 2rem; font-weight: 800; }
-    .summary .desc { margin-top: 8px; color:#6e7f95; font-size:.88rem; line-height:1.45; }
-    .summary.primary .value { color:#5b63ff; }
-    .summary.success .value { color:#21a95e; }
-    .summary.warning .value { color:#f0a202; }
-    .summary.danger .value { color:#ef4b3f; }
-    .panel {
-      background:#fff;
-      border:1px solid #edf0f5;
-      border-radius: 20px;
-      box-shadow: 0 12px 28px rgba(67, 89, 113, .06);
-      overflow: hidden;
-    }
-    .panel-inner { padding: 18px; }
-    .progress-list { display:grid; gap: 14px; }
-    .progress-row { display:grid; grid-template-columns: 1.35fr .65fr; gap: 16px; align-items:center; }
-    .progress-title { margin: 0 0 6px; font-weight: 700; }
-    .progress-meta { color:#7c8da5; font-size:.9rem; }
-    .bar {
-      height: 12px;
-      background: #edf0f5;
-      border-radius: 999px;
-      overflow: hidden;
-      margin-top: 10px;
-    }
-    .bar > span {
-      display:block;
-      height:100%;
-      border-radius: inherit;
-      background: linear-gradient(90deg, #5b63ff, #29b5f6, #7c8dff);
-      background-size: 200% 100%;
-      animation: shimmer 3.4s linear infinite;
-    }
-    .trend {
-      display:flex; align-items:center; justify-content:flex-end; gap:10px;
-      font-weight:800;
-      color:#182230;
-    }
-    .trend small {
-      font-weight:700; color:#6e7f95; background:#f5f7fb; border:1px solid #edf0f5;
-      border-radius:999px; padding:.3rem .55rem;
-    }
-    .insight {
-      display:grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
-    }
-    .insight-card {
-      padding: 18px;
-      border-radius: 18px;
-      border: 1px solid #edf0f5;
-      background: linear-gradient(180deg, #fff, #fbfcff);
-      animation: fadeUp .8s ease both;
-    }
-    .insight-card strong { display:block; margin-bottom: 6px; }
-    .insight-card p { margin: 0; color:#607186; line-height:1.55; }
-    .timeline { display:grid; gap: 12px; }
-    .timeline-item {
-      display:grid;
-      grid-template-columns: 82px 1fr auto;
-      gap: 14px;
-      align-items:center;
-      padding: 14px 16px;
-      border: 1px solid #edf0f5;
+    
+    /* Premium Card Styles */
+    .dashboard-card {
+      background: #ffffff;
+      border: 1px solid #eef0f3;
       border-radius: 16px;
-      background: linear-gradient(180deg, #fff, #fbfcff);
-      animation: fadeUp .7s ease both;
+      padding: 30px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     }
-    .timeline-item time {
-      color:#5b63ff;
-      font-weight:800;
-      font-size:.84rem;
+    
+    .card-header {
+      margin-bottom: 24px;
     }
-    .timeline-item .main { font-weight:700; margin-bottom: 4px; }
-    .timeline-item .sub { color:#6e7f95; font-size:.9rem; }
-    .status {
-      padding:.45rem .7rem;
-      border-radius:999px;
-      font-weight:800;
-      font-size:.8rem;
-      border:1px solid transparent;
-      transition: transform .2s ease, box-shadow .2s ease;
+    
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 6px 0;
     }
-    .status:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 10px 20px rgba(67, 89, 113, .08);
+    
+    .card-subtitle {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin: 0;
     }
-    .status.ok { background:#eaf8ef; color:#1f8f4d; border-color:#cfeedd; }
-    .status.proc { background:#fff7e6; color:#b97700; border-color:#ffe4b5; }
-    .status.bad { background:#fdecea; color:#c63f32; border-color:#fad1cd; }
-    .footer {
-      text-align:center;
-      color:#7c8da5;
-      margin-top: 18px;
-      font-size:.92rem;
+    
+    /* Selection Area */
+    .filter-section {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-bottom: 24px;
     }
-    @media (max-width: 1024px) {
-      .hero, .summary-grid, .insight { grid-template-columns: 1fr 1fr; }
-      .progress-row { grid-template-columns: 1fr; }
-      .timeline-item { grid-template-columns: 1fr; justify-items: start; }
+    
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
-    @media (max-width: 767.98px) {
-      .wrap { padding: 16px 14px 30px; }
-      .topbar { flex-direction: column; align-items: stretch; }
-      .brand { width: 100%; }
-      .pill { width: 100%; justify-content: center; }
-      .hero { grid-template-columns: 1fr; padding: 20px; border-radius: 20px; }
-      .summary-grid, .kpis, .insight { grid-template-columns: 1fr; }
-      h1 { max-width: none; font-size: 1.8rem; }
+    
+    .filter-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
     }
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation: none !important;
-        transition: none !important;
-        scroll-behavior: auto !important;
+    
+    .filter-select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      background-color: #fafaf9;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #1e293b;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      background-size: 16px;
+      transition: border-color 0.2s, background-color 0.2s;
+    }
+    
+    .filter-select:focus {
+      border-color: #cbd5e1;
+      background-color: #ffffff;
+    }
+    
+    /* Header Button */
+    .header-action-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: -8px;
+      margin-bottom: 20px;
+    }
+    
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #ffffff;
+      border: 1.5px solid #1e293b;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #1e293b;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+    
+    .btn-action:hover {
+      background-color: #f8fafc;
+    }
+    
+    .btn-action:active {
+      transform: scale(0.98);
+    }
+    
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    
+    .kpi-card {
+      background: #fafaf9;
+      border: 1px solid #f1f1ef;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100px;
+    }
+    
+    .kpi-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+    }
+    
+    .kpi-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #1e293b;
+      margin: 8px 0;
+      line-height: 1;
+    }
+    
+    .kpi-value.green { color: #15803d; }
+    .kpi-value.orange { color: #b45309; }
+    .kpi-value.blue { color: #1d4ed8; }
+    
+    .kpi-desc {
+      font-size: 0.8rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+    
+    /* Legend area */
+    .legend-container {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .legend-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+    
+    .legend-dot.green { background-color: #22c55e; }
+    .legend-dot.orange { background-color: #f97316; }
+    .legend-dot.red { background-color: #ef4444; }
+    
+    /* Table styling */
+    .table-container {
+      width: 100%;
+      overflow-x: auto;
+      margin-bottom: 20px;
+    }
+    
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    
+    .custom-table th {
+      background-color: #f5f5f3;
+      color: #475569;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      padding: 12px 16px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .custom-table td {
+      padding: 16px;
+      border-bottom: 1px solid #f1f5f9;
+      color: #334155;
+      font-weight: 500;
+    }
+    
+    .custom-table tr:last-child td {
+      border-bottom: none;
+    }
+    
+    .custom-table tbody tr {
+      transition: background-color 0.15s;
+    }
+    
+    .custom-table tbody tr:hover {
+      background-color: #fafafa;
+    }
+    
+    .year-cell {
+      font-weight: 700;
+      color: #0f172a;
+    }
+    
+    /* Badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .status-badge.green {
+      background-color: #f0fdf4;
+      color: #166534;
+      border: 1px solid #dcfce7;
+    }
+    
+    .status-badge.orange {
+      background-color: #fffbeb;
+      color: #92400e;
+      border: 1px solid #fef3c7;
+    }
+    
+    .status-badge.red {
+      background-color: #fef2f2;
+      color: #991b1b;
+      border: 1px solid #fee2e2;
+    }
+    
+    /* Custom Progress Bar */
+    .progress-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 140px;
+    }
+    
+    .progress-wrapper {
+      flex-grow: 1;
+      height: 8px;
+      background-color: #f1f5f9;
+      border-radius: 9999px;
+      overflow: hidden;
+      max-width: 100px;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      border-radius: 9999px;
+    }
+    
+    .progress-fill.green { background-color: #22c55e; }
+    .progress-fill.orange { background-color: #f97316; }
+    .progress-fill.red { background-color: #ef4444; }
+    
+    .progress-text {
+      font-weight: 700;
+      color: #0f172a;
+      min-width: 32px;
+    }
+    
+    .trend-text {
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    .trend-text.up {
+      color: #166534;
+    }
+    
+    .trend-text.neutral {
+      color: #64748b;
+    }
+    
+    /* Chart Section */
+    .chart-container {
+      width: 100%;
+      height: 280px;
+      margin-top: 15px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    
+    /* Comparison Ranking badge */
+    .rank-number {
+      font-weight: 700;
+      color: #64748b;
+      width: 24px;
+    }
+    
+    /* Footer section */
+    .portal-footer {
+      text-align: center;
+      padding: 20px 0 40px;
+      color: #94a3b8;
+      font-size: 0.85rem;
+      border-top: 1px solid #e2e8f0;
+      margin-top: 20px;
+    }
+
+    @media (max-width: 768px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .btn-action {
+        width: 100%;
+        justify-content: center;
       }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="brand">
-        <div class="brand-badge"><i class="bx bx-line-chart"></i></div>
-        <div>
-          <h2>Portal Publik Transparansi E-TPB</h2>
-          <p>Dinas Lingkungan Hidup Provinsi Kalimantan Selatan</p>
-        </div>
-      </div>
-      <div class="pill"><i class="bx bx-shield-quarter"></i> Terbuka untuk masyarakat</div>
-    </div>
 
-    <div class="hero">
-      <div>
-        <div class="eyebrow">Portal publik transparansi</div>
-        <h1>Data capaian TPB yang terverifikasi, mudah dipantau masyarakat</h1>
-        <p class="lead">
-          Portal ini menampilkan hasil capaian yang sudah diverifikasi pemerintah daerah,
-          sehingga masyarakat dapat melihat perkembangan janji RPJMD secara terbuka, rapi, dan mudah dipahami.
-        </p>
+  <div class="container">
+    
+    <!-- CARD 1: Evaluasi Capaian TPB -->
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h1 class="card-title">Evaluasi capaian TPB per tahun — masa RPJMD 2022-2026</h1>
+        <p class="card-subtitle">Pilih kabupaten/kota dan tahun untuk melihat ringkasan dan grafik perkembangan capaian indikator</p>
       </div>
-      <div class="hero-side">
-        <h3>Ringkasan cepat</h3>
-        <div class="kpis">
-          <div class="kpi">
-            <div class="label">Publikasi data</div>
-            <div class="value">{{ $publikasiRate }}%</div>
-            <div class="hint">{{ $totalTerverifikasi }} dari {{ $totalData }} data sudah terverifikasi</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Indikator aktif</div>
-            <div class="value">{{ $indikatorCount }}</div>
-            <div class="hint">Indikator yang siap dipantau publik</div>
-          </div>
-          <div class="kpi">
-            <div class="label">TPB tersedia</div>
-            <div class="value">{{ $tpbCount }}</div>
-            <div class="hint">Kelompok tujuan pembangunan berkelanjutan</div>
-          </div>
-          <div class="kpi">
-            <div class="label">Status menunggu</div>
-            <div class="value">{{ $totalMenunggu }}</div>
-            <div class="hint">Masih dalam proses verifikasi</div>
-          </div>
+      
+      <!-- Filter Controls -->
+      <div class="filter-section">
+        <div class="filter-group">
+          <label class="filter-label" for="regionSelect">Kabupaten/kota</label>
+          <select id="regionSelect" class="filter-select">
+            <option value="Banjar">Banjar</option>
+            <option value="Barito Kuala">Barito Kuala</option>
+            <option value="Banjarbaru">Banjarbaru</option>
+            <option value="Banjarmasin">Banjarmasin</option>
+            <option value="Hulu Sungai Selatan">Hulu Sungai Selatan</option>
+            <option value="Hulu Sungai Tengah">Hulu Sungai Tengah</option>
+            <option value="Hulu Sungai Utara">Hulu Sungai Utara</option>
+            <option value="Kotabaru">Kotabaru</option>
+            <option value="Tabalong">Tabalong</option>
+            <option value="Tanah Bumbu">Tanah Bumbu</option>
+            <option value="Tanah Laut">Tanah Laut</option>
+            <option value="Tapin">Tapin</option>
+          </select>
         </div>
+        
+        <div class="filter-group">
+          <label class="filter-label" for="viewSelect">Tampilan</label>
+          <select id="viewSelect" class="filter-select">
+            <option value="table">Tabel per tahun</option>
+            <option value="chart">Grafik tren</option>
+            <option value="both">Keduanya</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Guide Button -->
+      <div class="header-action-container">
+        <a href="#" class="btn-action" onclick="alert('Panduan membaca: pilih Kabupaten/Kota untuk melihat rincian evaluasi target TPB. Kategori AB menandakan capaian target sudah terpenuhi (Sangat Sesuai), SB berarti dalam proses (Sesuai), dan BB belum terpenuhi.')">Panduan baca <i class="bx bx-right-arrow-alt"></i></a>
+      </div>
+      
+      <!-- KPI stats grid -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-title">Total indikator RPJMD</div>
+          <div class="kpi-value" id="kpiTotal">17</div>
+          <div class="kpi-desc">Indikator TPB</div>
+        </div>
+        
+        <div class="kpi-card">
+          <div class="kpi-title">Tercapai 2026</div>
+          <div class="kpi-value green" id="kpiTercapai">12</div>
+          <div class="kpi-desc" id="kpiTercapaiPct">70% dari total</div>
+        </div>
+        
+        <div class="kpi-card">
+          <div class="kpi-title">Dalam proses 2026</div>
+          <div class="kpi-value orange" id="kpiProses">3</div>
+          <div class="kpi-desc">Perlu percepatan</div>
+        </div>
+        
+        <div class="kpi-card">
+          <div class="kpi-title">Kenaikan 2022→2026</div>
+          <div class="kpi-value blue" id="kpiKenaikan">+20%</div>
+          <div class="kpi-desc">Progres 6 tahun</div>
+        </div>
+      </div>
+      
+      <!-- Legend -->
+      <div class="legend-container" id="tableLegend">
+        <div class="legend-item">
+          <span class="legend-dot green"></span>
+          <span>Tercapai (AB)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot orange"></span>
+          <span>Dalam proses (SB)</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot red"></span>
+          <span>Belum tercapai (BB)</span>
+        </div>
+      </div>
+      
+      <!-- Table View -->
+      <div class="table-container" id="yearlyTableContainer">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Tahun</th>
+              <th>Total Indikator</th>
+              <th>Tercapai (AB)</th>
+              <th>Dalam Proses (SB)</th>
+              <th>Belum Tercapai (BB)</th>
+              <th>% Capaian</th>
+              <th>Tren</th>
+            </tr>
+          </thead>
+          <tbody id="yearlyTableBody">
+            <!-- Populated via Javascript -->
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Chart View -->
+      <div class="chart-container" id="chartContainer">
+        <canvas id="trendChart"></canvas>
+      </div>
+      
+    </div>
+    
+    <!-- CARD 2: Perbandingan Semua Kabupaten/Kota -->
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h2 class="card-title">Perbandingan semua kabupaten/kota — tahun terpilih</h2>
+        <p class="card-subtitle">Peringkat capaian berdasarkan persentase indikator yang tercapai (AB)</p>
+      </div>
+      
+      <div class="filter-section">
+        <div class="filter-group">
+          <label class="filter-label" for="yearSelect">Tahun</label>
+          <select id="yearSelect" class="filter-select">
+            <option value="2022">2022</option>
+            <option value="2023">2023</option>
+            <option value="2024">2024</option>
+            <option value="2025">2025</option>
+            <option value="2026">2026</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="header-action-container">
+        <a href="#" class="btn-action" onclick="alert('Membuka analisis lanjut untuk perbandingan indikator regional...')">Analisis lanjut <i class="bx bx-right-arrow-alt"></i></a>
+      </div>
+      
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Kabupaten/Kota</th>
+              <th>Total</th>
+              <th>AB</th>
+              <th>SB</th>
+              <th>BB</th>
+              <th>% Tercapai</th>
+            </tr>
+          </thead>
+          <tbody id="comparisonTableBody">
+            <!-- Populated via Javascript -->
+          </tbody>
+        </table>
       </div>
     </div>
-
-    <div class="section">
-      <div class="section-head">
-        <h2>Gambaran data publik</h2>
-        <span>Angka utama yang paling relevan untuk masyarakat</span>
-      </div>
-      <div class="summary-grid">
-        <div class="summary primary">
-          <div class="label">Data Terverifikasi</div>
-          <div class="value">{{ $totalTerverifikasi }}</div>
-          <div class="desc">Sudah lolos verifikasi dan tampil di portal publik.</div>
-        </div>
-        <div class="summary success">
-          <div class="label">Indikator Aktif</div>
-          <div class="value">{{ $indikatorCount }}</div>
-          <div class="desc">Indikator yang dapat dipantau melalui TPB dan RPJMD.</div>
-        </div>
-        <div class="summary warning">
-          <div class="label">Menunggu Verifikasi</div>
-          <div class="value">{{ $totalMenunggu }}</div>
-          <div class="desc">Data masuk tetapi belum ditayangkan ke publik.</div>
-        </div>
-        <div class="summary danger">
-          <div class="label">Ditolak</div>
-          <div class="value">{{ $totalDitolak }}</div>
-          <div class="desc">Data yang belum memenuhi validasi dan perlu perbaikan.</div>
-        </div>
-      </div>
+    
+    <!-- FOOTER -->
+    <div class="portal-footer">
+      Portal Transparansi Publik TPB &copy; 2026 - Dinas Lingkungan Hidup Provinsi Kalimantan Selatan
     </div>
-
-    <div class="section">
-      <div class="section-head">
-        <h2>Komposisi publikasi</h2>
-        <span>Proporsi data yang sudah siap untuk masyarakat</span>
-      </div>
-      <div class="panel">
-        <div class="panel-inner">
-          @php
-            $published = $totalTerverifikasi;
-            $pending = $totalMenunggu;
-            $rejected = $totalDitolak;
-            $safeTotal = max(1, $totalData);
-            $publishedPct = round(($published / $safeTotal) * 100);
-            $pendingPct = round(($pending / $safeTotal) * 100);
-            $rejectedPct = round(($rejected / $safeTotal) * 100);
-          @endphp
-          <div class="progress-list">
-            <div class="progress-row">
-              <div>
-                <div class="progress-title">Terverifikasi</div>
-                <div class="progress-meta">{{ $published }} data siap dipublikasikan</div>
-                <div class="bar"><span style="width: {{ $publishedPct }}%"></span></div>
-              </div>
-              <div class="trend">
-                {{ $publishedPct }}% <small>siap publik</small>
-              </div>
-            </div>
-            <div class="progress-row">
-              <div>
-                <div class="progress-title">Menunggu Verifikasi</div>
-                <div class="progress-meta">{{ $pending }} data masih antre validasi</div>
-                <div class="bar"><span style="width: {{ $pendingPct }}%; background: linear-gradient(90deg, #f0a202, #f4b942)"></span></div>
-              </div>
-              <div class="trend">
-                {{ $pendingPct }}% <small>proses</small>
-              </div>
-            </div>
-            <div class="progress-row">
-              <div>
-                <div class="progress-title">Ditolak</div>
-                <div class="progress-meta">{{ $rejected }} data perlu perbaikan</div>
-                <div class="bar"><span style="width: {{ $rejectedPct }}%; background: linear-gradient(90deg, #ef4b3f, #ff7a6e)"></span></div>
-              </div>
-              <div class="trend">
-                {{ $rejectedPct }}% <small>perlu revisi</small>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-head">
-        <h2>Sorotan terbaru</h2>
-        <span>Data terverifikasi paling baru yang ditampilkan ke publik</span>
-      </div>
-      <div class="insight">
-        <div class="insight-card">
-          <strong>Transparansi capaian</strong>
-          <p>Warga dapat melihat perkembangan indikator yang sudah diverifikasi tanpa harus masuk ke sistem.</p>
-        </div>
-        <div class="insight-card">
-          <strong>Ruang pemantauan</strong>
-          <p>Informasi disusun agar mudah dipahami, dari TPB, indikator, sampai status capaian per data.</p>
-        </div>
-        <div class="insight-card">
-          <strong>Publikasi terukur</strong>
-          <p>Portal menekankan data yang siap publik agar informasi tetap bersih, relevan, dan dapat dipercaya.</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="section">
-      <div class="section-head">
-        <h2>Rangkuman terbaru</h2>
-        <span>Update data yang terakhir diverifikasi</span>
-      </div>
-      <div class="panel">
-        <div class="panel-inner timeline">
-          @forelse($highlights as $item)
-            <div class="timeline-item">
-              <time>{{ $item->tanggal_terima ? \Carbon\Carbon::parse($item->tanggal_terima)->format('d M') : '-' }}</time>
-              <div>
-                <div class="main">{{ $item->tpb->nama_tpb ?? 'TPB' }} - {{ $item->indikator->nama_indikator_tpb ?? 'Indikator' }}</div>
-                <div class="sub">OPD {{ $item->opd }} | Status {{ $item->kategori_capaian ?? '-' }} | {{ $item->wilayah ?? '-' }}</div>
-              </div>
-              <span class="status {{ ($item->kategori_capaian ?? '') === 'SS' ? 'ok' : (($item->kategori_capaian ?? '') === 'SB' ? 'proc' : 'bad') }}">
-                {{ $item->kategori_capaian ?? '-' }}
-              </span>
-            </div>
-          @empty
-            <div class="muted">Belum ada data terverifikasi yang dipublikasikan.</div>
-          @endforelse
-        </div>
-      </div>
-    </div>
-
-    <div class="footer">
-      Portal ini terbuka untuk masyarakat tanpa login.
-    </div>
+    
   </div>
+
+  <script>
+    // Live database verified dashboard data
+    const regionsBaseline = @json($dashboardData);
+
+    let trendChartInstance = null;
+
+
+    // DOM Elements
+    const regionSelect = document.getElementById('regionSelect');
+    const viewSelect = document.getElementById('viewSelect');
+    const yearSelect = document.getElementById('yearSelect');
+    const yearlyTableBody = document.getElementById('yearlyTableBody');
+    const comparisonTableBody = document.getElementById('comparisonTableBody');
+    const chartContainer = document.getElementById('chartContainer');
+    const yearlyTableContainer = document.getElementById('yearlyTableContainer');
+    const tableLegend = document.getElementById('tableLegend');
+
+    // KPI DOM Elements
+    const kpiTotal = document.getElementById('kpiTotal');
+    const kpiTercapai = document.getElementById('kpiTercapai');
+    const kpiTercapaiPct = document.getElementById('kpiTercapaiPct');
+    const kpiProses = document.getElementById('kpiProses');
+    const kpiKenaikan = document.getElementById('kpiKenaikan');
+
+    // Update Year-per-year Table
+    function updateYearlyTable(region) {
+      const dataList = regionsBaseline[region];
+      yearlyTableBody.innerHTML = '';
+
+      dataList.forEach(row => {
+        const isUp = row.trend.includes('+');
+        const trendClass = isUp ? 'up' : 'neutral';
+        const progressFillColor = row.percent >= 60 ? 'green' : (row.percent >= 40 ? 'orange' : 'red');
+
+        yearlyTableBody.innerHTML += `
+          <tr>
+            <td class="year-cell">${row.year}</td>
+            <td>${row.total}</td>
+            <td><span class="status-badge green">${row.ab} indikator</span></td>
+            <td><span class="status-badge orange">${row.sb} indikator</span></td>
+            <td><span class="status-badge red">${row.bb} indikator</span></td>
+            <td>
+              <div class="progress-cell">
+                <div class="progress-wrapper">
+                  <div class="progress-fill ${progressFillColor}" style="width: ${row.percent}%"></div>
+                </div>
+                <span class="progress-text">${row.percent}%</span>
+              </div>
+            </td>
+            <td>
+              <span class="trend-text ${trendClass}">
+                ${row.trend}
+              </span>
+            </td>
+          </tr>
+        `;
+      });
+      
+      // Update KPIs based on the selected region (displaying 2026 data as latest)
+      const data2022 = dataList.find(y => y.year === 2022);
+      const data2026 = dataList.find(y => y.year === 2026);
+      
+      kpiTotal.textContent = data2026.total;
+      kpiTercapai.textContent = data2026.ab;
+      kpiTercapaiPct.textContent = `${data2026.percent}% dari total`;
+      kpiProses.textContent = data2026.sb;
+      
+      const percent2022 = data2022 ? data2022.percent : 0;
+      const diff = data2026.percent - percent2022;
+      kpiKenaikan.textContent = `${diff >= 0 ? '+' : ''}${diff}%`;
+    }
+
+    // Update Comparison Rankings Table
+    function updateComparisonTable(year) {
+      const yearInt = parseInt(year);
+      const yearDataList = [];
+
+      Object.keys(regionsBaseline).forEach(regionName => {
+        const yrData = regionsBaseline[regionName].find(y => y.year === yearInt);
+        if (yrData) {
+          yearDataList.push({
+            name: regionName,
+            total: yrData.total,
+            ab: yrData.ab,
+            sb: yrData.sb,
+            bb: yrData.bb,
+            percent: yrData.percent
+          });
+        }
+      });
+
+      // Sort by % Capaian DESC
+      yearDataList.sort((a, b) => b.percent - a.percent);
+
+      comparisonTableBody.innerHTML = '';
+      yearDataList.forEach((row, index) => {
+        const progressFillColor = row.percent >= 60 ? 'green' : (row.percent >= 40 ? 'orange' : 'red');
+        
+        comparisonTableBody.innerHTML += `
+          <tr>
+            <td><div class="rank-number">${index + 1}</div></td>
+            <td style="font-weight: 700; color: #1e293b;">${row.name}</td>
+            <td>${row.total}</td>
+            <td><span class="status-badge green">${row.ab}</span></td>
+            <td><span class="status-badge orange">${row.sb}</span></td>
+            <td><span class="status-badge red">${row.bb}</span></td>
+            <td>
+              <div class="progress-cell">
+                <div class="progress-wrapper">
+                  <div class="progress-fill ${progressFillColor}" style="width: ${row.percent}%"></div>
+                </div>
+                <span class="progress-text">${row.percent}%</span>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // Render / Update Chart.js Trend Graph
+    function updateTrendChart(region) {
+      const dataList = regionsBaseline[region];
+      const labels = dataList.map(y => y.year.toString());
+      const percentages = dataList.map(y => y.percent);
+
+      if (trendChartInstance) {
+        trendChartInstance.destroy();
+      }
+
+      const ctx = document.getElementById('trendChart').getContext('2d');
+      trendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Persentase Capaian (%)',
+            data: percentages,
+            borderColor: '#22c55e',
+            backgroundColor: 'rgba(34, 197, 94, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.3,
+            pointRadius: 6,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#22c55e',
+            pointBorderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              min: 0,
+              max: 100,
+              grid: { color: '#f1f5f9' },
+              ticks: { font: { family: 'Public Sans', weight: '500' } }
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { family: 'Public Sans', weight: '700' } }
+            }
+          }
+        }
+      });
+    }
+
+    // Setup displays based on view selection
+    function handleViewChange() {
+      const mode = viewSelect.value;
+      
+      if (mode === 'table') {
+        yearlyTableContainer.style.display = 'block';
+        tableLegend.style.display = 'flex';
+        chartContainer.style.display = 'none';
+      } else if (mode === 'chart') {
+        yearlyTableContainer.style.display = 'none';
+        tableLegend.style.display = 'none';
+        chartContainer.style.display = 'block';
+        updateTrendChart(regionSelect.value);
+      } else {
+        yearlyTableContainer.style.display = 'block';
+        tableLegend.style.display = 'flex';
+        chartContainer.style.display = 'block';
+        updateTrendChart(regionSelect.value);
+      }
+    }
+
+    // Event listeners
+    regionSelect.addEventListener('change', (e) => {
+      updateYearlyTable(e.target.value);
+      if (viewSelect.value !== 'table') {
+        updateTrendChart(e.target.value);
+      }
+    });
+
+    viewSelect.addEventListener('change', handleViewChange);
+
+    yearSelect.addEventListener('change', (e) => {
+      updateComparisonTable(e.target.value);
+    });
+
+    // Initialize Default State
+    window.addEventListener('DOMContentLoaded', () => {
+      updateYearlyTable('Banjar');
+      updateComparisonTable('2022');
+      handleViewChange();
+    });
+  </script>
 </body>
 </html>
