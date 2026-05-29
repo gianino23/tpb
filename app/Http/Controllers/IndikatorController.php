@@ -17,11 +17,19 @@ class IndikatorController extends Controller
 {
     public function index()
     {
-        $indikators = Indikator::with('target')->get();
+        $indikators = Indikator::with('target.tpb')
+            ->when(request('pilar'), function ($q) {
+                return $q->whereHas('target.tpb', function ($q2) {
+                    $q2->where('pilar', request('pilar'));
+                });
+            })
+            ->get();
+
         $targets = Target::all()->sortBy('no_target', SORT_NATURAL)->values();
+        $pilars = Tpb::select('pilar')->distinct()->orderBy('pilar')->pluck('pilar');
 
         //return view with data
-        return view('indikator.index', compact('indikators', 'targets'));
+        return view('indikator.index', compact('indikators', 'targets', 'pilars'));
     }
 
     public function list($id)

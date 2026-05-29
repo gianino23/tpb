@@ -15,7 +15,7 @@
           {{ $year }}
         </a>
       @endforeach
-      <button type="button" class="btn btn-outline-secondary">
+      <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
         <i class="bx bx-download me-1"></i> Unduh Laporan PDF
       </button>
     </div>
@@ -159,6 +159,40 @@
   .critical-danger { background: #fee2e2; color: #8a1f1f; }
   .critical-warning { background: #fff3d6; color: #7a4d00; }
   .critical-success { background: #e7f6df; color: #216e33; }
+
+  @media print {
+    #layout-menu,
+    .layout-navbar,
+    .btn,
+    .btn-group,
+    footer,
+    .footer,
+    .app-footer,
+    .border-bottom {
+      display: none !important;
+    }
+    .layout-page {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .content-wrapper {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+    .container-xxl {
+      padding: 0 !important;
+      margin: 0 !important;
+      max-width: 100% !important;
+    }
+    body {
+      background-color: #fff !important;
+      color: #000 !important;
+    }
+    .card {
+      border: 1px solid #ddd !important;
+      box-shadow: none !important;
+    }
+  }
 </style>
 
 @endsection

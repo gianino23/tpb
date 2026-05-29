@@ -92,6 +92,80 @@
         </div>
     </div>
 
+    {{-- Kategori Capaian Cards (matching portal publik stats) --}}
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card h-100" style="border: 1px solid #e2e8f0; border-radius: 12px;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="mb-1 fw-semibold" style="color:#64748b; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.03em;">Total Indikator</p>
+                            <h2 class="mb-0 fw-bold" style="color:#1e293b;">{{ $countTotalIndikator }}</h2>
+                            <small class="text-muted">Indikator TPB terverifikasi</small>
+                        </div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:#f1f5f9;">
+                            <i class="bx bx-bar-chart-alt fs-4" style="color:#475569;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100" style="border: 1px solid #dcfce7; border-radius: 12px; background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="mb-1 fw-semibold" style="color:#166534; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.03em;">Tercapai (SS)</p>
+                            <h2 class="mb-0 fw-bold" style="color:#15803d;">{{ $countSSCapaian }}</h2>
+                            <small class="text-muted">
+                                @if($countTotalIndikator > 0)
+                                {{ round(($countSSCapaian / $countTotalIndikator) * 100) }}% dari total
+                                @else
+                                0% dari total
+                                @endif
+                            </small>
+                        </div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:#dcfce7;">
+                            <i class="bx bx-check-circle fs-4" style="color:#15803d;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100" style="border: 1px solid #fef3c7; border-radius: 12px; background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="mb-1 fw-semibold" style="color:#92400e; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.03em;">Dalam Proses (SB)</p>
+                            <h2 class="mb-0 fw-bold" style="color:#b45309;">{{ $countSBCapaian }}</h2>
+                            <small class="text-muted">Perlu percepatan</small>
+                        </div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:#fef3c7;">
+                            <i class="bx bx-time fs-4" style="color:#b45309;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card h-100" style="border: 1px solid #fee2e2; border-radius: 12px; background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="mb-1 fw-semibold" style="color:#991b1b; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.03em;">Belum Tercapai (BB)</p>
+                            <h2 class="mb-0 fw-bold" style="color:#dc2626;">{{ $countBBCapaian }}</h2>
+                            <small class="text-muted">Perlu intervensi</small>
+                        </div>
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width:48px;height:48px;background:#fee2e2;">
+                            <i class="bx bx-x-circle fs-4" style="color:#dc2626;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ===== REKAP PER KABUPATEN (Admin/Provinsi only) ===== --}}
     @if(auth()->user()->level != 'Operator Kabupaten/Kota')
     @isset($rekapWilayah)
@@ -224,7 +298,7 @@
                     </div>
                 </div>
                 <span class="badge bg-light text-dark fw-normal">
-                    <i class="bx bx-info-circle"></i> Upload menggantikan seluruh data capaian Anda sebelumnya
+                    <i class="bx bx-info-circle"></i> Upload memperbarui/mengisi data capaian Anda untuk tahun terpilih tanpa menghapus data tahun lainnya
                 </span>
             </div>
         </div>
@@ -408,27 +482,49 @@
                 @endif
                 
                 <div class="row g-3 align-items-end">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted mb-1">Pencarian</label>
                         <div class="input-group input-group-merge">
                             <span class="input-group-text"><i class="bx bx-search fs-4"></i></span>
-                            <input type="text" id="customSearchInput" class="form-control form-control-lg" placeholder="Pencarian..." style="border-radius: 8px;">
+                            <input type="text" id="customSearchInput" class="form-control form-control-lg" placeholder="Cari data..." style="border-radius: 8px;">
                         </div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted mb-1">Status Verifikasi</label>
                         <select name="status" class="form-select form-select-lg" onchange="document.getElementById('filterForm').submit()" style="border-radius: 8px;">
-                            <option value="">-- Filter Semua Status --</option>
+                            <option value="">-- Semua Status --</option>
                             <option value="Menunggu Verifikasi" {{ request('status') == 'Menunggu Verifikasi' ? 'selected' : '' }}>Menunggu Verifikasi</option>
                             <option value="Terverifikasi" {{ request('status') == 'Terverifikasi' ? 'selected' : '' }}>Terverifikasi</option>
                             <option value="Ditolak" {{ request('status') == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
                         </select>
                     </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted mb-1">Tahun Data</label>
+                        <select name="tahun" class="form-select form-select-lg" onchange="document.getElementById('filterForm').submit()" style="border-radius: 8px;">
+                            <option value="">-- Semua Tahun --</option>
+                            @for($y = date('Y'); $y >= date('Y')-4; $y--)
+                                <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>{{ $y }}</option>
+                            @endfor
+                        </select>
+                    </div>
                 </div>
 
-                <div class="d-flex align-items-center gap-3 mt-3">
-                    <a href="{{ route('capaian_kabupaten.index') }}" class="btn btn-outline-secondary px-4" style="border-radius: 8px;">
-                        <i class="bx bx-reset me-1"></i> Reset
-                    </a>
-                    <span class="text-muted small">Menampilkan {{ $capaians->count() }} data</span>
+                <div class="row g-3 align-items-end mt-2">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted mb-1">Kategori Capaian</label>
+                        <select name="kategori_capaian" class="form-select form-select-lg" onchange="document.getElementById('filterForm').submit()" style="border-radius: 8px;">
+                            <option value="">-- Semua Kategori --</option>
+                            <option value="SS" {{ request('kategori_capaian') == 'SS' ? 'selected' : '' }}>Tercapai (SS)</option>
+                            <option value="SB" {{ request('kategori_capaian') == 'SB' ? 'selected' : '' }}>Dalam Proses (SB)</option>
+                            <option value="BB" {{ request('kategori_capaian') == 'BB' ? 'selected' : '' }}>Belum Tercapai (BB)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-8 d-flex align-items-center gap-3">
+                        <a href="{{ route('capaian_kabupaten.index') }}" class="btn btn-outline-secondary px-4" style="border-radius: 8px;">
+                            <i class="bx bx-reset me-1"></i> Reset
+                        </a>
+                        <span class="text-muted small">Menampilkan {{ $capaians->count() }} data</span>
+                    </div>
                 </div>
             </form>
 
@@ -970,8 +1066,9 @@
             $('#edit_year_label').text(this.value);
         });
 
-        // Edit Button Click
-        $('.btn-edit').on('click', function() {
+        // ===== DELEGATED EVENTS (for DataTable pagination support) =====
+        // Edit Button Click — delegated so it works on all pages
+        $(document).on('click', '.btn-edit', function() {
             var id = $(this).data('id');
             $.ajax({
                 url: `{{ route('capaian_kabupaten.index') }}/${id}/edit`,
@@ -1004,8 +1101,8 @@
             });
         });
 
-        // Detail Button Click
-        $('.btn-detail').on('click', function() {
+        // Detail Button Click — delegated so it works on all pages
+        $(document).on('click', '.btn-detail', function() {
             var id = $(this).data('id');
             $.ajax({
                 url: `{{ route('capaian_kabupaten.index') }}/${id}/edit`,
@@ -1051,9 +1148,9 @@
             });
         });
 
-        // Review Button Click
+        // Review Button Click — delegated so it works on all pages
         var currentReviewId = null;
-        $('.btn-review').on('click', function() {
+        $(document).on('click', '.btn-review', function() {
             currentReviewId = $(this).data('id');
             $('#keterangan_verifikasi').val('');
             $('#modalReview').modal('show');
@@ -1101,7 +1198,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         const detailId = urlParams.get('detail');
         if (detailId) {
-            $('.btn-detail[data-id="' + detailId + '"]').first().trigger('click');
+            setTimeout(function() {
+                $('.btn-detail[data-id="' + detailId + '"]').first().trigger('click');
+            }, 300);
         }
 
         // Custom Search Input binding to DataTable
@@ -1116,7 +1215,8 @@
             updateBulkActionPanel();
         });
 
-        $('.sub_chk').on('click', function() {
+        // Checkbox — delegated so it works on all pages
+        $(document).on('click', '.sub_chk', function() {
             if ($('.sub_chk:checked').length === $('.sub_chk').length) {
                 $('#checkAll').prop('checked', true);
             } else {

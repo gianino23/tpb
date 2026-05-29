@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\CapaianNotification;
+use App\Mail\CapaianImportNotification;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -47,6 +48,58 @@ class CapaianKabupatenController extends Controller
         $countTerverifikasi = (clone $statsQuery)->where('status', 'Terverifikasi')->count();
         $countDitolak = (clone $statsQuery)->where('status', 'Ditolak')->count();
 
+        // Kategori capaian stats — replicate portal publik dynamic logic (SS/SB/BB via kategori_capaian field or gap calculation)
+        $verifiedCapaian = (clone $statsQuery)
+            ->where('status', 'Terverifikasi')
+            ->with(['indikator'])
+            ->get();
+
+        // Build year-to-field map (matching portal's HomeController logic)
+        $yearFieldMap = [
+            2026 => 'tahun_n',
+            2025 => 'tahun_n1',
+            2024 => 'tahun_n2',
+            2023 => 'tahun_n3',
+            2022 => 'tahun_n4',
+        ];
+
+        // Determine which years to count based on tahun filter
+        $yearsToCount = $yearFieldMap;
+        if ($request->filled('tahun')) {
+            $tahun = (int)$request->tahun;
+            if (isset($yearFieldMap[$tahun])) {
+                $yearsToCount = [$tahun => $yearFieldMap[$tahun]];
+            }
+        }
+
+        $countSSCapaian = 0;
+        $countSBCapaian = 0;
+        $countBBCapaian = 0;
+
+        foreach ($verifiedCapaian as $c) {
+            foreach ($yearsToCount as $year => $field) {
+                $capaianValue = $this->parseNumericValue($c->{$field} ?? null);
+                if ($capaianValue === null) {
+                    continue;
+                }
+                $targetValue = $this->parseNumericValue($c->indikator->target_perpres59 ?? null);
+                $gap = ($targetValue !== null) ? round($targetValue - $capaianValue, 2) : null;
+
+                $status = in_array($c->kategori_capaian, ['SS', 'SB', 'BB'], true)
+                    ? $c->kategori_capaian
+                    : $this->statusFromGap($gap, $capaianValue);
+
+                if ($status === 'SS') {
+                    $countSSCapaian++;
+                } elseif ($status === 'SB') {
+                    $countSBCapaian++;
+                } elseif ($status === 'BB') {
+                    $countBBCapaian++;
+                }
+            }
+        }
+        $countTotalIndikator = $countSSCapaian + $countSBCapaian + $countBBCapaian;
+
         // Per-wilayah recap (only for Admin/Provinsi level)
         $rekapWilayah = [];
         if ($user->level != 'Operator Kabupaten/Kota') {
@@ -67,6 +120,28 @@ class CapaianKabupatenController extends Controller
         // Apply filter if exists
         if ($request->status) {
             $query->where('status', $request->status);
+        }
+
+        // Apply year filter — map tahun to the correct column (tahun_n/tahun_n1/...)
+        if ($request->filled('tahun')) {
+            $tahun = (int)$request->tahun;
+            $currentYear = (int)date('Y');
+            $offset = $currentYear - $tahun;
+            $fieldMap = [0 => 'tahun_n', 1 => 'tahun_n1', 2 => 'tahun_n2', 3 => 'tahun_n3', 4 => 'tahun_n4'];
+
+            if (isset($fieldMap[$offset])) {
+                $field = $fieldMap[$offset];
+                $query->where(function ($q) use ($field) {
+                    $q->whereNotNull($field)
+                      ->where($field, '!=', '')
+                      ->where($field, '!=', '-');
+                });
+            }
+        }
+
+        // Apply kategori_capaian (achievement status) filter
+        if ($request->filled('kategori_capaian')) {
+            $query->where('kategori_capaian', $request->kategori_capaian);
         }
 
         $capaians = $query->orderBy('created_at', 'desc')->get();
@@ -93,7 +168,9 @@ class CapaianKabupatenController extends Controller
 
         return view('capaian_kabupaten.index', compact(
             'capaians', 'tpbs', 'targets', 'indikators', 'rpjmds',
-            'countMenunggu', 'countTerverifikasi', 'countDitolak', 'wilayahList', 'rekapWilayah'
+            'countMenunggu', 'countTerverifikasi', 'countDitolak',
+            'countTotalIndikator', 'countSSCapaian', 'countSBCapaian', 'countBBCapaian',
+            'wilayahList', 'rekapWilayah'
         ));
     }
 
@@ -607,42 +684,69 @@ class CapaianKabupatenController extends Controller
         }
 
         if (!empty($validRows)) {
-            // Wipe all existing capaian for this user
-            CapaianKabupaten::where('user_id', $user->id)->delete();
-
             $date = Carbon::now()->format('Ymd');
 
             foreach ($validRows as $idx => $vRow) {
                 $no_tiket = '#XLS-' . $importYear . '-' . $date . '-' . str_pad($idx + 1, 3, '0', STR_PAD_LEFT);
 
-                // Set capaian to the correct year field, rest are '-'
-                $tahunData = ['tahun_n' => '-', 'tahun_n1' => '-', 'tahun_n2' => '-', 'tahun_n3' => '-', 'tahun_n4' => '-'];
-                $tahunData[$tahunField] = $vRow['capaian'];
+                // Check if capaian row already exists for this user and indicator
+                $existing = CapaianKabupaten::where('user_id', $user->id)
+                    ->where('indikator_id', $vRow['indikator_id'])
+                    ->first();
 
-                CapaianKabupaten::create([
-                    'no_tiket'        => $no_tiket,
-                    'user_id'         => $user->id,
-                    'wilayah'         => $user->wilayah ?? '-',
-                    'tpb_id'          => $vRow['tpb_id'],
-                    'target_id'       => $vRow['target_id'],
-                    'indikator_id'    => $vRow['indikator_id'],
-                    'rpjmd_id'        => null,
-                    'opd'             => $user->dinas ?? '-',
-                    'tahun_n4'        => $tahunData['tahun_n4'],
-                    'tahun_n3'        => $tahunData['tahun_n3'],
-                    'tahun_n2'        => $tahunData['tahun_n2'],
-                    'tahun_n1'        => $tahunData['tahun_n1'],
-                    'tahun_n'         => $tahunData['tahun_n'],
-                    'gap'             => $vRow['gap'],
-                    'kategori_capaian'=> $vRow['status_capaian'],
-                    'nama_dokumen'    => $vRow['sumber_data'] ?: 'Import Excel ' . $importYear,
-                    'jenis_dokumen'   => $vRow['catatan_imp'] ?: 'Excel',
-                    'tanggal_kirim'   => Carbon::now(),
-                    'status'          => 'Menunggu Verifikasi',
-                    'files'           => json_encode([]),
-                ]);
+                if ($existing) {
+                    $existing->update([
+                        $tahunField       => $vRow['capaian'],
+                        'gap'             => $vRow['gap'],
+                        'kategori_capaian'=> $vRow['status_capaian'],
+                        'nama_dokumen'    => $vRow['sumber_data'] ?: 'Import Excel ' . $importYear,
+                        'jenis_dokumen'   => $vRow['catatan_imp'] ?: 'Excel',
+                        'tanggal_kirim'   => Carbon::now(),
+                        'status'          => 'Menunggu Verifikasi', // reset status for verification
+                    ]);
+                } else {
+                    // Set capaian to the correct year field, rest are '-'
+                    $tahunData = ['tahun_n' => '-', 'tahun_n1' => '-', 'tahun_n2' => '-', 'tahun_n3' => '-', 'tahun_n4' => '-'];
+                    $tahunData[$tahunField] = $vRow['capaian'];
 
+                    CapaianKabupaten::create([
+                        'no_tiket'        => $no_tiket,
+                        'user_id'         => $user->id,
+                        'wilayah'         => $user->wilayah ?? '-',
+                        'tpb_id'          => $vRow['tpb_id'],
+                        'target_id'       => $vRow['target_id'],
+                        'indikator_id'    => $vRow['indikator_id'],
+                        'rpjmd_id'        => null,
+                        'opd'             => $user->dinas ?? '-',
+                        'tahun_n4'        => $tahunData['tahun_n4'],
+                        'tahun_n3'        => $tahunData['tahun_n3'],
+                        'tahun_n2'        => $tahunData['tahun_n2'],
+                        'tahun_n1'        => $tahunData['tahun_n1'],
+                        'tahun_n'         => $tahunData['tahun_n'],
+                        'gap'             => $vRow['gap'],
+                        'kategori_capaian'=> $vRow['status_capaian'],
+                        'nama_dokumen'    => $vRow['sumber_data'] ?: 'Import Excel ' . $importYear,
+                        'jenis_dokumen'   => $vRow['catatan_imp'] ?: 'Excel',
+                        'tanggal_kirim'   => Carbon::now(),
+                        'status'          => 'Menunggu Verifikasi',
+                        'files'           => json_encode([]),
+                    ]);
+                }
                 $successCount++;
+            }
+
+            if ($successCount > 0) {
+                // Send single consolidated Email Notification to Province Operators & Kabupaten Operator
+                try {
+                    $recipients = [$user->email];
+                    $provinsiEmails = \App\Models\User::where('level', 'Operator Provinsi')->pluck('email')->toArray();
+                    if (!empty($provinsiEmails)) {
+                        $recipients = array_merge($recipients, $provinsiEmails);
+                    }
+                    Mail::to($recipients)->send(new CapaianImportNotification($user, $successCount, $importYear));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Mail Error (Import Excel): ' . $e->getMessage());
+                }
             }
         }
 

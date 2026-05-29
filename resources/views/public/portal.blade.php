@@ -26,6 +26,128 @@
       flex-direction: column;
       gap: 30px;
     }
+
+    /* Top Navigation */
+    .portal-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+      border: 1px solid #eef0f3;
+      border-radius: 16px;
+      padding: 16px 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    }
+
+    .portal-nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .portal-nav-brand img {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      object-fit: cover;
+    }
+
+    .portal-nav-brand-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .portal-nav-brand-text strong {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1e293b;
+      line-height: 1.2;
+    }
+
+    .portal-nav-brand-text small {
+      font-size: 0.78rem;
+      color: #64748b;
+      font-weight: 500;
+    }
+
+    .portal-nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-nav {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+      border: none;
+    }
+
+    .btn-nav-primary {
+      background: #1e293b;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(30, 41, 59, 0.15);
+    }
+
+    .btn-nav-primary:hover {
+      background: #0f172a;
+      color: #ffffff;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(30, 41, 59, 0.2);
+    }
+
+    .btn-nav-outline {
+      background: transparent;
+      color: #1e293b;
+      border: 1.5px solid #e2e8f0;
+    }
+
+    .btn-nav-outline:hover {
+      background: #f8fafc;
+      border-color: #cbd5e1;
+      transform: translateY(-1px);
+    }
+
+    .btn-nav:active {
+      transform: scale(0.97);
+    }
+
+    .user-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px 6px 10px;
+      background: #f1f5f9;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .user-badge .bx {
+      font-size: 1.1rem;
+    }
+
+    @media (max-width: 600px) {
+      .portal-nav {
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .portal-nav-brand-text small {
+        display: none;
+      }
+      .btn-nav {
+        padding: 8px 14px;
+        font-size: 0.82rem;
+      }
+    }
     
     /* Premium Card Styles */
     .dashboard-card {
@@ -365,7 +487,36 @@
 <body>
 
   <div class="container">
-    
+
+    <!-- Navigation Bar -->
+    <nav class="portal-nav">
+      <div class="portal-nav-brand">
+        <img src="{{ url('storage/provkalsel.jpeg') }}" alt="Logo" />
+        <div class="portal-nav-brand-text">
+          <strong>E-TPB</strong>
+          <small>Portal Transparansi Publik</small>
+        </div>
+      </div>
+      <div class="portal-nav-actions">
+        @auth
+          <span class="user-badge">
+            <i class="bx bx-user-circle"></i>
+            {{ auth()->user()->name }}
+          </span>
+          <a href="{{ route('dashboard.index') }}" class="btn-nav btn-nav-primary">
+            <i class="bx bx-layout"></i>
+            Dashboard
+          </a>
+        @endauth
+        @guest
+          <a href="{{ route('login') }}" class="btn-nav btn-nav-primary">
+            <i class="bx bx-log-in"></i>
+            Login
+          </a>
+        @endguest
+      </div>
+    </nav>
+
     <!-- CARD 1: Evaluasi Capaian TPB -->
     <div class="dashboard-card">
       <div class="card-header">
@@ -405,9 +556,12 @@
       
       <!-- Guide Button -->
       <div class="header-action-container">
+        <!--
         <a href="#" class="btn-action" onclick="alert('Panduan membaca: pilih Kabupaten/Kota untuk melihat rincian evaluasi target TPB. Kategori AB menandakan capaian target sudah terpenuhi (Sangat Sesuai), SB berarti dalam proses (Sesuai), dan BB belum terpenuhi.')">Panduan baca <i class="bx bx-right-arrow-alt"></i></a>
+        -->
       </div>
       
+
       <!-- KPI stats grid -->
       <div class="kpi-grid">
         <div class="kpi-card">
@@ -439,7 +593,7 @@
       <div class="legend-container" id="tableLegend">
         <div class="legend-item">
           <span class="legend-dot green"></span>
-          <span>Tercapai (AB)</span>
+          <span>Tercapai (SS)</span>
         </div>
         <div class="legend-item">
           <span class="legend-dot orange"></span>
@@ -458,7 +612,7 @@
             <tr>
               <th>Tahun</th>
               <th>Total Indikator</th>
-              <th>Tercapai (AB)</th>
+              <th>Tercapai (SS)</th>
               <th>Dalam Proses (SB)</th>
               <th>Belum Tercapai (BB)</th>
               <th>% Capaian</th>
@@ -482,7 +636,7 @@
     <div class="dashboard-card">
       <div class="card-header">
         <h2 class="card-title">Perbandingan semua kabupaten/kota — tahun terpilih</h2>
-        <p class="card-subtitle">Peringkat capaian berdasarkan persentase indikator yang tercapai (AB)</p>
+        <p class="card-subtitle">Peringkat capaian berdasarkan persentase indikator yang tercapai (SS)</p>
       </div>
       
       <div class="filter-section">
@@ -499,7 +653,9 @@
       </div>
       
       <div class="header-action-container">
+        <!--
         <a href="#" class="btn-action" onclick="alert('Membuka analisis lanjut untuk perbandingan indikator regional...')">Analisis lanjut <i class="bx bx-right-arrow-alt"></i></a>
+        -->
       </div>
       
       <div class="table-container">
@@ -509,7 +665,7 @@
               <th>#</th>
               <th>Kabupaten/Kota</th>
               <th>Total</th>
-              <th>AB</th>
+              <th>SS</th>
               <th>SB</th>
               <th>BB</th>
               <th>% Tercapai</th>

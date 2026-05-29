@@ -12,11 +12,21 @@ class TargetController extends Controller
 {
     public function index()
     {
-        $targets = Target::with('tpb')->get()->sortBy('no_target', SORT_NATURAL)->values();
+        $targets = Target::with('tpb')
+            ->when(request('pilar'), function ($q) {
+                return $q->whereHas('tpb', function ($q2) {
+                    $q2->where('pilar', request('pilar'));
+                });
+            })
+            ->get()
+            ->sortBy('no_target', SORT_NATURAL)
+            ->values();
+
         $tpbs = Tpb::all();
+        $pilars = Tpb::select('pilar')->distinct()->orderBy('pilar')->pluck('pilar');
 
         //return view with data
-        return view('target.index', compact('targets', 'tpbs'));
+        return view('target.index', compact('targets', 'tpbs', 'pilars'));
     }
 
     public function list($id)

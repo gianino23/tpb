@@ -11,11 +11,18 @@ class TpbController extends Controller
 {
     public function index()
     {
-        //get all posts from Models
-        $tpbs = Tpb::orderByRaw('LENGTH(no_tpb) ASC, no_tpb ASC')->get();
+        //get all posts from Models, filter by pilar if present
+        $tpbs = Tpb::orderByRaw('LENGTH(no_tpb) ASC, no_tpb ASC')
+            ->when(request('pilar'), function ($q) {
+                return $q->where('pilar', request('pilar'));
+            })
+            ->get();
+
+        //get distinct pillars for filter
+        $pilars = Tpb::select('pilar')->distinct()->orderBy('pilar')->pluck('pilar');
 
         //return view with data
-        return view('tpb.index', compact('tpbs'));
+        return view('tpb.index', compact('tpbs', 'pilars'));
     }
 
     public function list($id)
