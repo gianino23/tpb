@@ -67,6 +67,7 @@
     <!-- Responsive Table -->
     <div class="card page-panel">
       <div class="card-body py-4">
+         @if(auth()->user()->level != 'Operator Provinsi')
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
             <div>
                 <div class="text-muted small fw-light">Data / <span class="fw-semibold text-body">RPJMD</span></div>
@@ -81,7 +82,8 @@
                 </a>
             </div>
         </div>
-
+        @endif
+        
         {{-- Region Filter Pills --}}
         @if(auth()->user()->level != 'Operator Kabupaten/Kota')
         <div class="region-tabs-container mb-4">

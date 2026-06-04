@@ -358,13 +358,13 @@
                             <div class="mb-2">
                                 <label class="form-label small mb-1 fw-semibold">Pilih Tahun Data</label>
                                 <select name="year" id="dl-year" class="form-select form-select-sm">
-                                    @for($y = date('Y'); $y >= date('Y')-4; $y--)
+                                    @for($y = 2024; $y >= 2020; $y--)
                                         <option value="{{ $y }}">{{ $y }}</option>
                                     @endfor
                                 </select>
                             </div>
                             <button type="submit" class="btn btn-primary btn-sm w-100 mt-1">
-                                <i class="bx bx-download me-1"></i> Unduh template_capaian_<span id="dl-year-label">{{ date('Y') }}</span>.xlsx
+                                <i class="bx bx-download me-1"></i> Unduh template_capaian_<span id="dl-year-label">2024</span>.xlsx
                             </button>
                         </form>
                     </div>
@@ -414,7 +414,7 @@
                             <div class="mb-2">
                                 <label class="form-label small mb-1 fw-semibold">Tahun Data</label>
                                 <select name="year" class="form-select form-select-sm" required>
-                                    @for($y = date('Y'); $y >= date('Y')-4; $y--)
+                                    @for($y = 2024; $y >= 2020; $y--)
                                         <option value="{{ $y }}">{{ $y }}</option>
                                     @endfor
                                 </select>
@@ -502,7 +502,7 @@
                         <label class="form-label small fw-semibold text-muted mb-1">Tahun Data</label>
                         <select name="tahun" class="form-select form-select-lg" onchange="document.getElementById('filterForm').submit()" style="border-radius: 8px;">
                             <option value="">-- Semua Tahun --</option>
-                            @for($y = date('Y'); $y >= date('Y')-4; $y--)
+                            @for($y = 2024; $y >= 2020; $y--)
                                 <option value="{{ $y }}" {{ request('tahun') == $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endfor
                         </select>
@@ -713,7 +713,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Tahun Data</label>
                             <select name="year" id="manual-year" class="form-control select2" required>
-                                @for($y = date('Y'); $y >= date('Y')-4; $y--)
+                                @for($y = 2024; $y >= 2020; $y--)
                                     <option value="{{ $y }}">{{ $y }}</option>
                                 @endfor
                             </select>
@@ -725,7 +725,7 @@
                     </div>
                     <div class="row">
                         <div class="col mb-3">
-                            <label class="form-label">★ Capaian <span id="manual-year-label">{{ date('Y') }}</span></label>
+                            <label class="form-label">★ Capaian <span id="manual-year-label">2024</span></label>
                             <input type="text" name="capaian_manual" class="form-control" placeholder="Contoh: 74.60 / Ada / Belum" required>
                         </div>
                     </div>
@@ -830,7 +830,7 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Tahun Data</label>
                             <select name="year" id="edit_year" class="form-control select2-edit" required>
-                                @for($y = date('Y'); $y >= date('Y')-4; $y--)
+                                @for($y = 2024; $y >= 2020; $y--)
                                     <option value="{{ $y }}">{{ $y }}</option>
                                 @endfor
                             </select>
@@ -842,7 +842,7 @@
                     </div>
                     <div class="row">
                         <div class="col mb-3">
-                            <label class="form-label">★ Capaian <span id="edit_year_label">{{ date('Y') }}</span></label>
+                            <label class="form-label">★ Capaian <span id="edit_year_label">2024</span></label>
                             <input type="text" name="capaian_manual" id="edit_capaian_manual" class="form-control" required>
                         </div>
                     </div>
@@ -1080,7 +1080,7 @@
                     $('#edit_indikator_id').val(data.indikator_id).trigger('change');
                     $('#edit_rpjmd_id').val(data.rpjmd_id).trigger('change');
                     $('#edit_opd').val(data.opd);
-                    const currentYear = new Date().getFullYear();
+                    const currentYear = 2024;
                     const yearFields = [
                         { year: currentYear, value: data.tahun_n },
                         { year: currentYear - 1, value: data.tahun_n1 },

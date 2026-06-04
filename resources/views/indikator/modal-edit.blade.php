@@ -73,13 +73,27 @@
           </div>
           <div class="row">
             <div class="col mb-3">
-              <label for="nameBasic" class="form-label">Kewenangan Kota</label>
+              <label for="kewenangan_kota" class="form-label">Kewenangan Kota</label>
               <select class="form-control" id="kewenangan_kota-edit" required>
                   <option value="" selected disabled>Pilih..</option>
                   <option value="Kota">Kewenangan Kota</option>
                   <option value="-">Bukan Kewenangan Kota</option>
               </select>
               <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-kewenangan_kota-edit"></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col mb-3">
+              <label for="wilayah-edit" class="form-label">Wilayah</label>
+              <select class="form-control" id="wilayah-edit" required>
+                  <option value="">Pilih Wilayah</option>
+                  @foreach($wilayahList as $w)
+                      @if($w->kategori != 'Provinsi')
+                      <option value="{{ $w->nama_wilayah }}">{{ $w->nama_wilayah }}</option>
+                      @endif
+                  @endforeach
+              </select>
+              <div class="alert alert-danger mt-2 d-none" role="alert" id="alert-wilayah-edit"></div>
             </div>
           </div>
 
@@ -118,6 +132,7 @@
                 $('#ringkasan_target_perpres59-edit').val(response.data.ringkasan_target_perpres59);
                 $('#kewenangan_kabupaten-edit').val(response.data.kewenangan_kabupaten);
                 $('#kewenangan_kota-edit').val(response.data.kewenangan_kota);
+                $('#wilayah-edit').val(response.data.wilayah);
 
                 //open modal
                 $('#modal-edit').modal('show');
@@ -139,6 +154,7 @@
         let ringkasan_target_perpres59  = $('#ringkasan_target_perpres59-edit').val();
         let kewenangan_kabupaten  = $('#kewenangan_kabupaten-edit').val();
         let kewenangan_kota = $('#kewenangan_kota-edit').val();
+        let wilayah = $('#wilayah-edit').val();
         let token   = $("meta[name='csrf-token']").attr("content");
         
         //ajax
@@ -156,6 +172,7 @@
                 "ringkasan_target_perpres59": ringkasan_target_perpres59,
                 "kewenangan_kabupaten": kewenangan_kabupaten,
                 "kewenangan_kota": kewenangan_kota,
+                "wilayah": wilayah,
                 "_token": token
             },
             success:function(response){

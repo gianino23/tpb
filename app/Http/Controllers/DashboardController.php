@@ -11,9 +11,12 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = Auth::user();
-        $currentYear = (int)date('Y');
+        // Fixed RPJMD period: 2020-2024
+        $rpjmdStart = 2020;
+        $rpjmdEnd = 2024;
+        $currentYear = $rpjmdEnd;
         $selectedYear = (int)($request->year ?? $currentYear);
-        if ($selectedYear < $currentYear - 4 || $selectedYear > $currentYear) {
+        if ($selectedYear < $rpjmdStart || $selectedYear > $rpjmdEnd) {
             $selectedYear = $currentYear;
         }
 
@@ -25,7 +28,7 @@ class DashboardController extends Controller
             4 => 'tahun_n4',
         ];
         $yearField = $yearFieldMap[$currentYear - $selectedYear];
-        $previousYear = $selectedYear > $currentYear - 4 ? $selectedYear - 1 : null;
+        $previousYear = $selectedYear > $rpjmdStart ? $selectedYear - 1 : null;
         $previousYearField = $previousYear ? $yearFieldMap[$currentYear - $previousYear] : null;
         $rankBy = $request->rank_by === 'pilar' ? 'pilar' : 'tpb';
 
@@ -116,7 +119,7 @@ class DashboardController extends Controller
             ->values();
 
         $chartData = [$statusCounts['SS'], $statusCounts['SB'], $statusCounts['BB'], $statusCounts['NA']];
-        $availableYears = range($currentYear, $currentYear - 4);
+        $availableYears = range($rpjmdEnd, $rpjmdStart);
 
         return view('dashboard.index', compact(
             'stats',

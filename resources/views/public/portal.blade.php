@@ -520,7 +520,7 @@
     <!-- CARD 1: Evaluasi Capaian TPB -->
     <div class="dashboard-card">
       <div class="card-header">
-        <h1 class="card-title">Evaluasi capaian TPB per tahun — masa RPJMD 2022-2026</h1>
+        <h1 class="card-title">Evaluasi capaian TPB per tahun — masa RPJMD 2020-2024</h1>
         <p class="card-subtitle">Pilih kabupaten/kota dan tahun untuk melihat ringkasan dan grafik perkembangan capaian indikator</p>
       </div>
       
@@ -571,21 +571,21 @@
         </div>
         
         <div class="kpi-card">
-          <div class="kpi-title">Tercapai 2026</div>
+          <div class="kpi-title">Tercapai 2024</div>
           <div class="kpi-value green" id="kpiTercapai">12</div>
           <div class="kpi-desc" id="kpiTercapaiPct">70% dari total</div>
         </div>
         
         <div class="kpi-card">
-          <div class="kpi-title">Dalam proses 2026</div>
+          <div class="kpi-title">Dalam proses 2024</div>
           <div class="kpi-value orange" id="kpiProses">3</div>
           <div class="kpi-desc">Perlu percepatan</div>
         </div>
         
         <div class="kpi-card">
-          <div class="kpi-title">Kenaikan 2022→2026</div>
+          <div class="kpi-title">Kenaikan 2020→2024</div>
           <div class="kpi-value blue" id="kpiKenaikan">+20%</div>
-          <div class="kpi-desc">Progres 6 tahun</div>
+          <div class="kpi-desc">Progres 5 tahun</div>
         </div>
       </div>
       
@@ -643,11 +643,11 @@
         <div class="filter-group">
           <label class="filter-label" for="yearSelect">Tahun</label>
           <select id="yearSelect" class="filter-select">
+            <option value="2020">2020</option>
+            <option value="2021">2021</option>
             <option value="2022">2022</option>
             <option value="2023">2023</option>
             <option value="2024">2024</option>
-            <option value="2025">2025</option>
-            <option value="2026">2026</option>
           </select>
         </div>
       </div>
@@ -680,7 +680,7 @@
     
     <!-- FOOTER -->
     <div class="portal-footer">
-      Portal Transparansi Publik TPB &copy; 2026 - Dinas Lingkungan Hidup Provinsi Kalimantan Selatan
+      Portal Transparansi Publik TPB &copy; 2024 - Dinas Lingkungan Hidup Provinsi Kalimantan Selatan
     </div>
     
   </div>
@@ -743,17 +743,17 @@
         `;
       });
       
-      // Update KPIs based on the selected region (displaying 2026 data as latest)
-      const data2022 = dataList.find(y => y.year === 2022);
-      const data2026 = dataList.find(y => y.year === 2026);
+      // Update KPIs based on the selected region (displaying 2024 data as latest)
+      const data2020 = dataList.find(y => y.year === 2020);
+      const data2024 = dataList.find(y => y.year === 2024);
       
-      kpiTotal.textContent = data2026.total;
-      kpiTercapai.textContent = data2026.ab;
-      kpiTercapaiPct.textContent = `${data2026.percent}% dari total`;
-      kpiProses.textContent = data2026.sb;
+      kpiTotal.textContent = data2024.total;
+      kpiTercapai.textContent = data2024.ab;
+      kpiTercapaiPct.textContent = `${data2024.percent}% dari total`;
+      kpiProses.textContent = data2024.sb;
       
-      const percent2022 = data2022 ? data2022.percent : 0;
-      const diff = data2026.percent - percent2022;
+      const percent2020 = data2020 ? data2020.percent : 0;
+      const diff = data2024.percent - percent2020;
       kpiKenaikan.textContent = `${diff >= 0 ? '+' : ''}${diff}%`;
     }
 
@@ -893,7 +893,7 @@
     // Initialize Default State
     window.addEventListener('DOMContentLoaded', () => {
       updateYearlyTable('Banjar');
-      updateComparisonTable('2022');
+      updateComparisonTable('2020');
       handleViewChange();
     });
   </script>

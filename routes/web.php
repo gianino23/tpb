@@ -13,7 +13,7 @@ use App\Http\Controllers\CapaianKabupatenController;
 use App\Http\Controllers\WilayahController;
 
 Route::get('/', [\App\Http\Controllers\HomeController::class, 'index'])->name('portal.publik');
-Route::get('/portal-publik', [\App\Http\Controllers\HomeController::class, 'index'])->name('portal.publik');
+Route::get('/portal-publik', [\App\Http\Controllers\HomeController::class, 'index']);
 Route::get('/login', [AuthController::class,'login'])->name('login');
 Route::post('/postlogin', [AuthController::class, 'postlogin'])->name('postlogin');
 Route::get('/logout', [AuthController::class, 'logout'])->name('logout');
@@ -30,8 +30,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('tpb', TpbController::class);
     Route::put('/tpb/{Tpb}', 'App\Http\Controllers\TpbController@update');
 
-    Route::resource('target', TargetController::class);
+    Route::get('/target/download-template', [TargetController::class, 'downloadTemplate'])->name('target.download-template');
+    Route::post('/target/import', [TargetController::class, 'import'])->name('target.import');
     Route::put('/target/{Target}', 'App\Http\Controllers\TargetController@update');
+    Route::resource('target', TargetController::class);
 
     Route::post('/indikator/import', [IndikatorController::class, 'import'])->name('indikator.import');
     Route::post('/indikator/verify/{id}', [IndikatorController::class, 'verify'])->name('indikator.verify');

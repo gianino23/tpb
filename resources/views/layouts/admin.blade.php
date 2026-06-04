@@ -660,12 +660,7 @@
             </li>
     @elseif(auth()->user()->level == 'Operator Provinsi')
           <!-- Portal Publik -->
-          <li class="menu-item {{ Request::is('portal-publik') || Request::routeIs('portal.publik') ? 'active' : '' }}">
-            <a href="{{ url('/portal-publik') }}" class="menu-link" target="_blank">
-              <i class="menu-icon tf-icons bx bx-globe"></i>
-              <div data-i18n="Portal Publik">Portal Publik</div>
-            </a>
-          </li>
+         
           <li class="menu-item {{ Request::is('capaian_kabupaten*') ? 'active' : '' }}">
               <a href="{{ route('capaian_kabupaten.index') }}" class="menu-link">
                 <i class="menu-icon tf-icons bx bx-file"></i>

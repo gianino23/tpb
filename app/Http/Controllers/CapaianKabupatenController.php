@@ -56,11 +56,11 @@ class CapaianKabupatenController extends Controller
 
         // Build year-to-field map (matching portal's HomeController logic)
         $yearFieldMap = [
-            2026 => 'tahun_n',
-            2025 => 'tahun_n1',
-            2024 => 'tahun_n2',
-            2023 => 'tahun_n3',
-            2022 => 'tahun_n4',
+            2024 => 'tahun_n',
+            2023 => 'tahun_n1',
+            2022 => 'tahun_n2',
+            2021 => 'tahun_n3',
+            2020 => 'tahun_n4',
         ];
 
         // Determine which years to count based on tahun filter
@@ -346,8 +346,8 @@ class CapaianKabupatenController extends Controller
 
     private function mapCapaianToYearFields(int $year, string $capaian): array
     {
-        $currentYear = (int)date('Y');
-        $offset = $currentYear - $year;
+        $rpjmdEnd = 2024;
+        $offset = $rpjmdEnd - $year;
         $tahunFieldMap = [0 => 'tahun_n', 1 => 'tahun_n1', 2 => 'tahun_n2', 3 => 'tahun_n3', 4 => 'tahun_n4'];
         $tahunData = ['tahun_n' => '-', 'tahun_n1' => '-', 'tahun_n2' => '-', 'tahun_n3' => '-', 'tahun_n4' => '-'];
 
@@ -376,12 +376,14 @@ class CapaianKabupatenController extends Controller
 
     public function downloadTemplate(Request $request)
     {
-        $year = (int)($request->year ?? date('Y'));
-        $currentYear = (int)date('Y');
-        $offset = $currentYear - $year;
+        $rpjmdStart = 2020;
+        $rpjmdEnd   = 2024;
+
+        $year = (int)($request->year ?? $rpjmdEnd);
+        $offset = $rpjmdEnd - $year;
 
         if ($offset < 0 || $offset > 4) {
-            return back()->with('error', 'Tahun tidak valid. Pilih antara ' . ($currentYear - 4) . ' hingga ' . $currentYear . '.');
+            return back()->with('error', 'Tahun tidak valid. Pilih antara ' . $rpjmdStart . ' hingga ' . $rpjmdEnd . '.');
         }
 
         $indikators = Indikator::with('target.tpb')
@@ -609,15 +611,17 @@ class CapaianKabupatenController extends Controller
 
     public function importExcel(Request $request)
     {
-        $currentYear = (int)date('Y');
+        $rpjmdStart = 2020;
+        $rpjmdEnd   = 2024;
+
         $request->validate([
             'file' => 'required|mimes:xlsx,xls',
-            'year' => 'required|integer|min:' . ($currentYear - 4) . '|max:' . $currentYear,
+            'year' => 'required|integer|min:' . $rpjmdStart . '|max:' . $rpjmdEnd,
         ]);
 
         $user        = Auth::user();
         $importYear  = (int)$request->year;
-        $offset      = $currentYear - $importYear;
+        $offset      = $rpjmdEnd - $importYear;
 
         // Map offset → DB column name
         $tahunFieldMap = [0 => 'tahun_n', 1 => 'tahun_n1', 2 => 'tahun_n2', 3 => 'tahun_n3', 4 => 'tahun_n4'];

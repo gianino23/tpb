@@ -52,20 +52,70 @@
         background: #eef2ff;
         color: #4f46e5;
     }
+    .region-tabs {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 4px 4px 10px 4px;
+        gap: 8px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .region-tabs::-webkit-scrollbar {
+        height: 6px;
+    }
+    .region-tabs::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 4px;
+    }
+    .region-tab-item {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        color: #475569;
+        padding: 8px 24px;
+        border-radius: 20px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: inline-block;
+    }
+    .region-tab-item:hover {
+        background: #f8fafc;
+        color: #1e293b;
+        border-color: #cbd5e1;
+    }
+    .region-tab-item.active {
+        background: #fff;
+        color: #1e293b;
+        border-color: #64748b;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        font-weight: 600;
+    }
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y page-shell">
+    @if ($errors->any())
+        <div class="alert alert-danger alert-dismissible" role="alert">
+            <h5 class="alert-heading mb-1"><i class="bx bx-error me-2"></i>Terjadi Kesalahan Validasi:</h5>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     @if(session('import_summary'))
+        @php $summary = session('import_summary'); @endphp
         <div class="alert alert-info">
             <h5>Ringkasan Import:</h5>
-            <p>✅ Berhasil diimpor: {{ session('import_summary')['success'] }} baris</p>
-            <p>⚠️ Berhasil dengan peringatan (format catatan tidak sesuai): {{ session('import_summary')['warning'] }} baris</p>
-            <p>❌ Gagal diimpor: {{ session('import_summary')['failed'] }} baris</p>
-            @if(count(session('import_summary')['errors']) > 0)
+            <p>✅ Berhasil diimpor: {{ $summary['success'] ?? 0 }} baris</p>
+            <p>⚠️ Berhasil dengan peringatan (format catatan tidak sesuai): {{ $summary['warning'] ?? 0 }} baris</p>
+            <p>❌ Gagal diimpor: {{ $summary['failed'] ?? 0 }} baris</p>
+            @if(count($summary['errors'] ?? []) > 0)
                 <hr>
                 <h6>Detail Error:</h6>
                 <ul style="max-height: 150px; overflow-y: auto;">
-                    @foreach(session('import_summary')['errors'] as $err)
+                    @foreach($summary['errors'] as $err)
                         <li>{{ $err }}</li>
                     @endforeach
                 </ul>
@@ -91,17 +141,21 @@
             @endif
         </div>
 
-        {{-- Pilar Filter Pills --}}
-        <div class="pilar-tabs-container mb-4">
-            <div class="pilar-tabs">
+        {{-- Region Filter Pills --}}
+        @if(auth()->user()->level != 'Operator Kabupaten/Kota')
+        <div class="region-tabs-container mb-4">
+            <div class="region-tabs">
                 <a href="{{ route('indikator.index') }}" 
-                   class="pilar-tab-item {{ !request('pilar') ? 'active' : '' }}">Semua</a>
-                @foreach($pilars as $p)
-                    <a href="{{ route('indikator.index', ['pilar' => $p]) }}" 
-                       class="pilar-tab-item {{ request('pilar') == $p ? 'active' : '' }}">{{ $p }}</a>
+                   class="region-tab-item {{ !request('wilayah') ? 'active' : '' }}">Semua Wilayah</a>
+                @foreach($wilayahList as $w)
+                    @if($w->kategori != 'Provinsi')
+                    <a href="{{ route('indikator.index', array_merge(request()->except('wilayah'), ['wilayah' => $w->nama_wilayah])) }}" 
+                       class="region-tab-item {{ request('wilayah') == $w->nama_wilayah ? 'active' : '' }}">{{ $w->nama_wilayah }}</a>
+                    @endif
                 @endforeach
             </div>
         </div>
+        @endif
 
         {{-- Search Input Form --}}
         <div class="row g-3 align-items-center mb-4">
@@ -123,6 +177,7 @@
           <table id="table" class="table table-striped table-bordered" style="width:100%">
             <thead>
               <tr class="text-nowrap">
+                <th>Wilayah</th>
                 <th>Pilar</th>
                 <th>No Indikator</th>
                 <th>Indikator TPB</th>
@@ -140,6 +195,7 @@
             <tbody>
               @foreach($indikators as $data)
               <tr id="index_{{ $data->id }}">
+              <td>{{ $data->wilayah ?: '-' }}</td>
                 <td><span class="badge-pilar">{{ $data->target && $data->target->tpb ? $data->target->tpb->pilar : '-' }}</span></td>
                 <td>{{ $data->target ? $data->target->no_target : '-' }}</td> 
                 <td>{{ $data->target ? $data->target->nama_target : '-' }}</td>

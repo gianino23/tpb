@@ -17,19 +17,36 @@ class IndikatorController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
         $indikators = Indikator::with('target.tpb')
             ->when(request('pilar'), function ($q) {
                 return $q->whereHas('target.tpb', function ($q2) {
                     $q2->where('pilar', request('pilar'));
                 });
             })
+            ->when(request('wilayah'), function ($q) {
+                $cleanReq = str_replace(['Kabupaten ', 'Kab. ', 'Kota ', 'kabupaten ', 'kota '], '', request('wilayah'));
+                return $q->where('wilayah', 'LIKE', '%' . $cleanReq . '%');
+            })
+            ->when($user->level == 'Operator Kabupaten/Kota', function ($q) use ($user) {
+                $userWilayah = '';
+                if (str_contains(strtolower($user->wilayah), 'barito kuala')) {
+                    $userWilayah = 'Barito Kuala';
+                } elseif (str_contains(strtolower($user->wilayah), 'banjar')) {
+                    $userWilayah = 'Banjar';
+                } elseif (str_contains(strtolower($user->wilayah), 'tapin')) {
+                    $userWilayah = 'Tapin';
+                }
+                return $q->where('wilayah', $userWilayah);
+            })
             ->get();
 
         $targets = Target::all()->sortBy('no_target', SORT_NATURAL)->values();
         $pilars = Tpb::select('pilar')->distinct()->orderBy('pilar')->pluck('pilar');
+        $wilayahList = \App\Models\Wilayah::all();
 
         //return view with data
-        return view('indikator.index', compact('indikators', 'targets', 'pilars'));
+        return view('indikator.index', compact('indikators', 'targets', 'pilars', 'wilayahList'));
     }
 
     public function list($id)
@@ -51,6 +68,7 @@ class IndikatorController extends Controller
             'ringkasan_target_perpres59'   => 'required',
             'kewenangan_kabupaten'   => 'required',
             'kewenangan_kota'   => 'required',
+            'wilayah'   => 'required',
         ]);
         //check if validation fails
         if ($validator->fails()) {
@@ -76,6 +94,7 @@ class IndikatorController extends Controller
             'ringkasan_target_perpres59'     => $request->ringkasan_target_perpres59, 
             'kewenangan_kabupaten'     => $request->kewenangan_kabupaten, 
             'kewenangan_kota'     => $request->kewenangan_kota, 
+            'wilayah'     => $request->wilayah, 
             'user_id'            => Auth::id(),
             'status'             => 'Terverifikasi',
         ]);
@@ -90,118 +109,206 @@ class IndikatorController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls'
-        ]);
+        try {
+            $request->validate([
+                'file' => [
+                    'required',
+                    function ($attribute, $value, $fail) {
+                        if (!$value instanceof \Illuminate\Http\UploadedFile) {
+                            $fail('File tidak valid.');
+                            return;
+                        }
+                        $extension = strtolower($value->getClientOriginalExtension());
+                        if (!in_array($extension, ['xlsx', 'xls'])) {
+                            $fail('File harus berupa dokumen Excel (.xlsx atau .xls).');
+                        }
+                    },
+                ],
+            ]);
 
-        $file = $request->file('file');
-        $spreadsheet = IOFactory::load($file->getPathname());
-        $worksheet = $spreadsheet->getActiveSheet();
-        $rows = $worksheet->toArray();
+            $file = $request->file('file');
 
-        $successCount = 0;
-        $warningCount = 0;
-        $failedCount = 0;
-        $errors = [];
-        $validRows = [];
+            // Pastikan tidak timeout untuk file besar
+            set_time_limit(300);
 
-        for ($i = 4; $i < count($rows); $i++) {
-            $row = $rows[$i];
-            
-            $noIndikator = trim($row[0] ?? '');
-            
-            // Skip empty rows
-            if (empty($noIndikator) && empty($row[1]) && empty($row[2])) {
-                continue;
-            }
-            
-            // Skip example rows which usually contain specific text
-            if (str_contains($noIndikator, 'MULAI ISI DATA')) {
-                continue;
-            }
+            \Log::info('Import Indikator dimulai', [
+                'filename' => $file->getClientOriginalName(),
+                'size'     => $file->getSize(),
+            ]);
 
-            $indikatorRpjmd = trim($row[1] ?? '');
-            $targetRpjmd = trim($row[2] ?? '');
-            $dokumenData = trim($row[3] ?? '');
-            $catatan = trim($row[4] ?? '');
-            $targetPerpres = trim($row[5] ?? '');
-            $targetPerpresRingkas = trim($row[6] ?? '');
-            $kewenanganKab = trim($row[7] ?? '');
-            $kewenanganKota = trim($row[8] ?? '');
+            $spreadsheet = IOFactory::load($file->getPathname());
+            $worksheet   = $spreadsheet->getActiveSheet();
+            $rows        = $worksheet->toArray();
+            $rowCount    = count($rows);
 
-            // Validations
-            $target = Target::where('no_target', $noIndikator)->first();
-            if (!$target) {
-                $failedCount++;
-                $errors[] = "Baris " . ($i+1) . ": No Indikator '$noIndikator' tidak ditemukan di master data sistem.";
-                continue;
-            }
+            \Log::info("File Excel berhasil dibaca. Total baris: {$rowCount}");
 
-            if (empty($targetRpjmd) || empty($dokumenData) || empty($catatan)) {
-                $failedCount++;
-                $errors[] = "Baris " . ($i+1) . ": Kolom C, D, atau E tidak boleh kosong.";
-                continue;
-            }
+            $successCount = 0;
+            $warningCount = 0;
+            $failedCount  = 0;
+            $errors       = [];
+            $validRows    = [];
 
-            if (!in_array(strtolower($kewenanganKab), ['ya', 'tidak']) || !in_array(strtolower($kewenanganKota), ['ya', 'tidak'])) {
-                $failedCount++;
-                $errors[] = "Baris " . ($i+1) . ": Kolom H dan I (Kewenangan) hanya boleh berisi Ya atau Tidak.";
-                continue;
-            }
+            for ($i = 4; $i < $rowCount; $i++) {
+                $row = $rows[$i];
 
-            // Cek format catatan untuk warning
-            $hasWarning = !preg_match('/Capaian.*\|.*GAP.*\|.*Status:/i', $catatan);
-
-            $validRows[] = [
-                '_target_id'                 => $target->id,
-                '_has_warning'               => $hasWarning,
-                'target_id'                  => $target->id,
-                'no_indikator'               => $target->no_target,
-                'nama_indikator_tpb'         => $target->nama_target,
-                'indikator_rpjmd'            => $target->nama_target,
-                'target_rpjmd'               => $targetRpjmd,
-                'dokumen_pendukung'          => $dokumenData,
-                'catatan'                    => $catatan,
-                'target_perpres59'           => $targetPerpres,
-                'ringkasan_target_perpres59' => $targetPerpresRingkas,
-                'kewenangan_kabupaten'       => (strtolower($kewenanganKab) == 'ya') ? 'Kabupaten' : '-',
-                'kewenangan_kota'            => (strtolower($kewenanganKota) == 'ya') ? 'Kota' : '-',
-                'user_id'                    => Auth::id(),
-                'status'                     => 'Terverifikasi',
-            ];
-        }
-
-        // Jika terdapat data yang valid untuk diimport
-        if (!empty($validRows)) {
-            // Hapus SEMUA data Indikator lama beserta relasi capaian-nya
-            $semuaIndikatorIds = Indikator::pluck('id');
-
-            if ($semuaIndikatorIds->count() > 0) {
-                Capaian::whereIn('indikator_id', $semuaIndikatorIds)->delete();
-                CapaianKabupaten::whereIn('indikator_id', $semuaIndikatorIds)->delete();
-                Indikator::whereIn('id', $semuaIndikatorIds)->delete();
-            }
-
-            // Simpan seluruh data baru
-            foreach ($validRows as $validRow) {
-                if ($validRow['_has_warning']) {
-                    $warningCount++;
-                } else {
-                    $successCount++;
+                if (!is_array($row)) {
+                    continue;
                 }
-                unset($validRow['_target_id'], $validRow['_has_warning']);
-                Indikator::create($validRow);
+
+                $noIndikator = trim($row[0] ?? '');
+
+                // Skip baris kosong
+                if ($noIndikator === '' && trim($row[1] ?? '') === '' && trim($row[2] ?? '') === '') {
+                    continue;
+                }
+
+                // Skip baris contoh
+                if (str_contains(strtoupper($noIndikator), 'MULAI ISI DATA')) {
+                    continue;
+                }
+
+                $indikatorRpjmd          = trim($row[1] ?? '');
+                $targetRpjmd             = trim($row[2] ?? '');
+                $dokumenData             = trim($row[3] ?? '');
+                $catatan                 = trim($row[4] ?? '');
+                $targetPerpres           = trim($row[5] ?? '');
+                $targetPerpresRingkas    = trim($row[6] ?? '');
+                $kewenanganKab           = trim($row[7] ?? '');
+                $kewenanganKota          = trim($row[8] ?? '');
+
+                // Validasi: No Indikator harus ditemukan di master Target
+                $target = Target::where('no_target', $noIndikator)->first();
+                if (!$target) {
+                    $failedCount++;
+                    $errors[] = "Baris " . ($i + 1) . ": No Indikator '$noIndikator' tidak ditemukan di master data sistem.";
+                    continue;
+                }
+
+                if ($targetRpjmd === '' || $dokumenData === '') {
+                    $failedCount++;
+                    $errors[] = "Baris " . ($i + 1) . ": Kolom C (Target RPJMD) atau D (Dokumen Data) tidak boleh kosong.";
+                    continue;
+                }
+
+                // Default catatan
+                if ($catatan === '') {
+                    $catatan = '-';
+                }
+
+                // --- Validasi Kewenangan Kabupaten ---
+                $kewenanganKabClean = '-';
+                $kewenanganKabLower = strtolower($kewenanganKab);
+                if (in_array($kewenanganKabLower, ['ya', 'kabupaten'])) {
+                    $kewenanganKabClean = 'Kabupaten';
+                } elseif (!in_array($kewenanganKabLower, ['tidak', 'nihil', '-', ''])) {
+                    $failedCount++;
+                    $errors[] = "Baris " . ($i + 1) . ": Kolom H (Kewenangan Kabupaten) hanya boleh berisi Ya, Tidak, Kabupaten, atau dikosongkan.";
+                    continue;
+                }
+
+                // --- Validasi Kewenangan Kota ---
+                $kewenanganKotaClean = '-';
+                $kewenanganKotaLower = strtolower($kewenanganKota);
+                if (in_array($kewenanganKotaLower, ['ya', 'kota'])) {
+                    $kewenanganKotaClean = 'Kota';
+                } elseif (!in_array($kewenanganKotaLower, ['tidak', 'nihil', '-', ''])) {
+                    $failedCount++;
+                    $errors[] = "Baris " . ($i + 1) . ": Kolom I (Kewenangan Kota) hanya boleh berisi Ya, Tidak, Kota, atau dikosongkan.";
+                    continue;
+                }
+
+                // Cek format catatan (warning, non-blokir)
+                $hasWarning = !preg_match('/Capaian.*\|.*GAP.*\|.*Status:/i', $catatan);
+
+                // Gunakan indikator_rpjmd dari Excel (kolom B), fallback ke nama_target
+                $indikatorValue = !empty($indikatorRpjmd) ? $indikatorRpjmd : $target->nama_target;
+
+                $validRows[] = [
+                    '_target_id'                 => $target->id,
+                    '_has_warning'               => $hasWarning,
+                    'target_id'                  => $target->id,
+                    'no_indikator'               => $target->no_target,
+                    'nama_indikator_tpb'         => $target->nama_target,
+                    'indikator_rpjmd'            => $indikatorValue,
+                    'target_rpjmd'               => $targetRpjmd,
+                    'dokumen_pendukung'          => $dokumenData,
+                    'catatan'                    => $catatan,
+                    'target_perpres59'           => $targetPerpres,
+                    'ringkasan_target_perpres59' => $targetPerpresRingkas,
+                    'kewenangan_kabupaten'       => $kewenanganKabClean,
+                    'kewenangan_kota'            => $kewenanganKotaClean,
+                    'wilayah'                    => $request->wilayah,
+                    'user_id'                    => Auth::id(),
+                    'status'                     => 'Terverifikasi',
+                ];
             }
+
+            // Jika ada data valid, hapus lama & simpan baru
+            if (!empty($validRows)) {
+                $semuaIndikatorIds = Indikator::where('wilayah', $request->wilayah)->pluck('id');
+
+                if ($semuaIndikatorIds->count() > 0) {
+                    Capaian::whereIn('indikator_id', $semuaIndikatorIds)->delete();
+                    CapaianKabupaten::whereIn('indikator_id', $semuaIndikatorIds)->delete();
+                    Indikator::whereIn('id', $semuaIndikatorIds)->delete();
+                }
+
+                foreach ($validRows as $validRow) {
+                    if ($validRow['_has_warning']) {
+                        $warningCount++;
+                    } else {
+                        $successCount++;
+                    }
+                    unset($validRow['_target_id'], $validRow['_has_warning']);
+                    Indikator::create($validRow);
+                }
+            }
+
+            \Log::info("Import Indikator selesai. Berhasil: {$successCount}, Peringatan: {$warningCount}, Gagal: {$failedCount}");
+
+            $request->session()->put('import_summary', [
+                'success' => $successCount,
+                'warning' => $warningCount,
+                'failed'  => $failedCount,
+                'errors'  => $errors,
+            ]);
+
+            if ($failedCount > 0 && empty($validRows)) {
+                return redirect()->back()
+                    ->with('error', 'Import gagal. Tidak ada data valid yang ditemukan. Periksa template dan format file Anda.')
+                    ->with('import_summary', [
+                        'success' => 0,
+                        'warning' => 0,
+                        'failed'  => $failedCount,
+                        'errors'  => $errors,
+                    ]);
+            }
+
+            if ($failedCount > 0) {
+                return redirect()->back()->with('success', "Import selesai dengan {$failedCount} baris error (lihat detail).");
+            }
+
+            return redirect()->back()->with('success', "Import berhasil! {$successCount} data ditambahkan.");
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            \Log::error('Import Indikator gagal: ' . $e->getMessage(), [
+                'file'  => $e->getFile(),
+                'line'  => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat memproses file: ' . $e->getMessage())
+                ->with('import_summary', [
+                    'success' => 0,
+                    'warning' => 0,
+                    'failed'  => 0,
+                    'errors'  => ['Sistem error: ' . $e->getMessage()],
+                ]);
         }
-
-        $request->session()->put('import_summary', [
-            'success' => $successCount,
-            'warning' => $warningCount,
-            'failed'  => $failedCount,
-            'errors'  => $errors
-        ]);
-
-        return redirect()->back()->with('success', 'Proses import selesai.');
     }
 
     public function verify(Request $request, $id)
@@ -251,6 +358,7 @@ class IndikatorController extends Controller
             'ringkasan_target_perpres59' => 'required',
             'kewenangan_kabupaten'       => 'required',
             'kewenangan_kota'            => 'required',
+            'wilayah'                    => 'required',
         ]);
 
         //check if validation fails
@@ -277,6 +385,7 @@ class IndikatorController extends Controller
             'ringkasan_target_perpres59' => $request->ringkasan_target_perpres59,
             'kewenangan_kabupaten'       => $request->kewenangan_kabupaten,
             'kewenangan_kota'            => $request->kewenangan_kota,
+            'wilayah'                    => $request->wilayah,
         ]);
 
         //return response

@@ -33,7 +33,8 @@ class HomeController extends Controller
             'Kotabaru', 'Tabalong', 'Tanah Bumbu', 'Tanah Laut', 'Tapin'
         ];
         
-        $years = [2022, 2023, 2024, 2025, 2026];
+        // Fixed RPJMD period: 2020-2024
+        $years = [2020, 2021, 2022, 2023, 2024];
         
         // Initialize the structure
         $dashboardData = [];
@@ -60,11 +61,11 @@ class HomeController extends Controller
             ->get();
             
         $yearFieldMap = [
-            2026 => 'tahun_n',
-            2025 => 'tahun_n1',
-            2024 => 'tahun_n2',
-            2023 => 'tahun_n3',
-            2022 => 'tahun_n4',
+            2024 => 'tahun_n',
+            2023 => 'tahun_n1',
+            2022 => 'tahun_n2',
+            2021 => 'tahun_n3',
+            2020 => 'tahun_n4',
         ];
 
         foreach ($capaians as $c) {

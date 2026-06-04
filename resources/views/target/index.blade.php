@@ -55,6 +55,30 @@
 </style>
 
 <div class="container-xxl flex-grow-1 container-p-y page-shell">
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if(session('import_summary') && !empty(session('import_summary')['warnings']))
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>Data dilewati:</strong><br>
+            @foreach(session('import_summary')['warnings'] as $warning)
+                {{ $warning }}<br>
+            @endforeach
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if(session('import_summary') && !empty(session('import_summary')['errors']))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Data gagal:</strong><br>
+            @foreach(session('import_summary')['errors'] as $error)
+                {{ $error }}<br>
+            @endforeach
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
     <div class="card page-panel">
       <div class="card-body py-4">
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
@@ -133,10 +157,19 @@
   <!-- / Content -->
 @include('target.modal-create')
 @include('target.modal-edit')
+@include('target.modal-import')
 @include('target.delete-post')
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            document.querySelectorAll('.alert.alert-dismissible').forEach(function(alert) {
+                var bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
         setTimeout(function() {
             var dt = $('#table').DataTable();
             var customSearchInput = document.getElementById('customSearchInput');

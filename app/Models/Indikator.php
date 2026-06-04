@@ -20,6 +20,7 @@ class Indikator extends Model
         'indikator_rpjmd',
         'target_rpjmd',
         'dokumen_pendukung',
+        'wilayah',
         'catatan',
         'target_perpres59',
         'ringkasan_target_perpres59',
