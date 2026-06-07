@@ -689,10 +689,10 @@ class CapaianKabupatenController extends Controller
 
         if (!empty($validRows)) {
             $date = Carbon::now()->format('Ymd');
+            $existingTicketsCount = CapaianKabupaten::where('no_tiket', 'like', '#XLS-' . $importYear . '-' . $date . '-%')->count();
+            $newInsertCount = 0;
 
             foreach ($validRows as $idx => $vRow) {
-                $no_tiket = '#XLS-' . $importYear . '-' . $date . '-' . str_pad($idx + 1, 3, '0', STR_PAD_LEFT);
-
                 // Check if capaian row already exists for this user and indicator
                 $existing = CapaianKabupaten::where('user_id', $user->id)
                     ->where('indikator_id', $vRow['indikator_id'])
@@ -709,6 +709,9 @@ class CapaianKabupatenController extends Controller
                         'status'          => 'Menunggu Verifikasi', // reset status for verification
                     ]);
                 } else {
+                    $newInsertCount++;
+                    $no_tiket = '#XLS-' . $importYear . '-' . $date . '-' . str_pad($existingTicketsCount + $newInsertCount, 3, '0', STR_PAD_LEFT);
+
                     // Set capaian to the correct year field, rest are '-'
                     $tahunData = ['tahun_n' => '-', 'tahun_n1' => '-', 'tahun_n2' => '-', 'tahun_n3' => '-', 'tahun_n4' => '-'];
                     $tahunData[$tahunField] = $vRow['capaian'];
