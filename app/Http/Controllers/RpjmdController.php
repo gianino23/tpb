@@ -479,25 +479,16 @@ class RpjmdController extends Controller
             ];
         }
 
-        // Jika terdapat data yang valid untuk diimport
+        // Jika terdapat data yang valid untuk diimport, lakukan updateOrCreate
         if (!empty($validRows)) {
-            $wilayahsToWipe = array_unique(array_column($validRows, 'wilayah'));
-
-            // Dapatkan ID RPJMD yang akan dihapus
-            $rpjmdIdsToWipe = Rpjmd::whereIn('wilayah', $wilayahsToWipe)->pluck('id');
-
-            if ($rpjmdIdsToWipe->count() > 0) {
-                // Hapus data capaian berelasi
-                Capaian::whereIn('rpjmd_id', $rpjmdIdsToWipe)->delete();
-                CapaianKabupaten::whereIn('rpjmd_id', $rpjmdIdsToWipe)->delete();
-                
-                // Hapus data RPJMD lama
-                Rpjmd::whereIn('id', $rpjmdIdsToWipe)->delete();
-            }
-
-            // Simpan seluruh data baru
             foreach ($validRows as $validRow) {
-                Rpjmd::create($validRow);
+                Rpjmd::updateOrCreate(
+                    [
+                        'wilayah'            => $validRow['wilayah'],
+                        'no_indikator_rpjmd' => $validRow['no_indikator_rpjmd'],
+                    ],
+                    $validRow
+                );
                 $successCount++;
             }
         }

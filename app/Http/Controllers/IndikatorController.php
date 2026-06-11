@@ -244,16 +244,8 @@ class IndikatorController extends Controller
                 ];
             }
 
-            // Jika ada data valid, hapus lama & simpan baru
+            // Jika ada data valid, lakukan updateOrCreate
             if (!empty($validRows)) {
-                $semuaIndikatorIds = Indikator::where('wilayah', $request->wilayah)->pluck('id');
-
-                if ($semuaIndikatorIds->count() > 0) {
-                    Capaian::whereIn('indikator_id', $semuaIndikatorIds)->delete();
-                    CapaianKabupaten::whereIn('indikator_id', $semuaIndikatorIds)->delete();
-                    Indikator::whereIn('id', $semuaIndikatorIds)->delete();
-                }
-
                 foreach ($validRows as $validRow) {
                     if ($validRow['_has_warning']) {
                         $warningCount++;
@@ -261,7 +253,14 @@ class IndikatorController extends Controller
                         $successCount++;
                     }
                     unset($validRow['_target_id'], $validRow['_has_warning']);
-                    Indikator::create($validRow);
+                    
+                    Indikator::updateOrCreate(
+                        [
+                            'target_id' => $validRow['target_id'],
+                            'wilayah'   => $validRow['wilayah'],
+                        ],
+                        $validRow
+                    );
                 }
             }
 
